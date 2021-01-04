@@ -43,7 +43,7 @@ namespace Midity.Tests
                 return (T) deserializer.ReadEvent(ref status);
             }
 
-            byte GetRandomByte()
+            private byte GetRandomByte()
             {
                 return (byte) UnityEngine.Random.Range(0, 0xff);
             }

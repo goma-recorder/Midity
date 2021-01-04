@@ -31,8 +31,8 @@ namespace Midity
             {
                 for (var i = 0; i < length; i++)
                 {
-                    offset += i;
                     bytes[offset] = (byte) ((value >> (8 * (length - i - 1))) & 0xff);
+                    offset++;
                 }
             }
 
@@ -48,6 +48,10 @@ namespace Midity
             var stringBytes = encoding.GetBytes("MTrk");
             Buffer.BlockCopy(stringBytes, 0, bytes, 0, 4);
             foreach (var mTrkEvent in midiTrack.Events) bytes = Concat(bytes, SerializeEvent(mTrkEvent, encoding));
+
+            var chunkEnd = bytes.Length - 8;
+            for (var i = 0; i < 4; i++)
+                bytes[4 + i] = (byte) ((chunkEnd >> (8 * (4 - i - 1))) & 0xff);
 
             return bytes;
         }

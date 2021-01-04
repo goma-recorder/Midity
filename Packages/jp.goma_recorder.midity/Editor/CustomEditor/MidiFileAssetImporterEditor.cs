@@ -13,7 +13,7 @@ namespace Midity.Playable.Editor
         public override void OnEnable()
         {
             base.OnEnable();
-            _codeName = serializedObject.FindProperty("_codeName");
+            _codeName = serializedObject.FindProperty("_characterCodeName");
         }
 
         public override void OnInspectorGUI()

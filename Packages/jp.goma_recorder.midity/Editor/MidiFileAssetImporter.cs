@@ -9,7 +9,7 @@ namespace Midity.Playable.Editor
     [ScriptedImporter(1, "mid")]
     internal sealed class MidiFileAssetImporter : ScriptedImporter
     {
-        [SerializeField] private string _codeName = "us-ascii";
+        [SerializeField] private string _characterCodeName = "us-ascii";
         [SerializeField] internal MidiFileAsset _midiFileAsset;
 
         public override void OnImportAsset(AssetImportContext context)
@@ -18,7 +18,7 @@ namespace Midity.Playable.Editor
 
             // Main MIDI file asset
             var buffer = File.ReadAllBytes(context.assetPath);
-            var deserializer = new MidiDeserializer(buffer, _codeName);
+            var deserializer = new MidiDeserializer(buffer, _characterCodeName);
             var (midiFile, trackBytes) = deserializer.LoadTrackBytes();
 
             var fileAsset = MidiFileAsset.Instantiate(midiFile, assetName, trackBytes);

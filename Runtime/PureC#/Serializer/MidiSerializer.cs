@@ -4,7 +4,7 @@ using static Midity.NoteKey;
 
 namespace Midity
 {
-    public sealed class MidiSerializer
+    public static class MidiSerializer
     {
         private static byte[] Concat(byte[] bytes1, byte[] bytes2)
         {

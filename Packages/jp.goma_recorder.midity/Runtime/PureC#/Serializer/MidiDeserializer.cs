@@ -5,7 +5,7 @@ using static Midity.NoteKey;
 
 namespace Midity
 {
-    public class MidiDeserializer
+    public sealed class MidiDeserializer
     {
         private readonly MidiDataStreamReader _reader;
 
@@ -114,7 +114,7 @@ namespace Midity
             }
         }
 
-        protected virtual MTrkEvent ReadMetaEvent(uint ticks, byte eventNumber, uint length)
+        private MTrkEvent ReadMetaEvent(uint ticks, byte eventNumber, uint length)
         {
             byte[] bytes;
             switch (eventNumber)
@@ -237,7 +237,7 @@ namespace Midity
             }
         }
 
-        protected virtual MTrkEvent ReadSysExEvent(uint ticks)
+        private MTrkEvent ReadSysExEvent(uint ticks)
         {
             var length = _reader.ReadMultiByteValue() - 1;
             var bytes = new byte[length];
@@ -250,7 +250,7 @@ namespace Midity
             throw new Exception();
         }
 
-        protected virtual MTrkEvent ReadMidiEvent(uint ticks, byte status, byte channel)
+        private MTrkEvent ReadMidiEvent(uint ticks, byte status, byte channel)
         {
             switch (status & 0xf0)
             {

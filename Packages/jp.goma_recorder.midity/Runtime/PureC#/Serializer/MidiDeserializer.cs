@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using static Midity.NoteKey;
 
 namespace Midity
@@ -9,18 +10,18 @@ namespace Midity
     {
         private readonly MidiDataStreamReader _reader;
 
-        public MidiDeserializer(byte[] data, Encoding encoding)
+        public MidiDeserializer(Stream stream, Encoding encoding)
         {
-            _reader = new MidiDataStreamReader(data, encoding ?? Encoding.ASCII);
+            _reader = new MidiDataStreamReader(stream, encoding ?? Encoding.ASCII);
         }
 
-        public MidiDeserializer(byte[] data, int codePage)
-            : this(data, Encoding.GetEncoding(codePage))
+        public MidiDeserializer(Stream stream, int codePage)
+            : this(stream, Encoding.GetEncoding(codePage))
         {
         }
 
-        public MidiDeserializer(byte[] data, string codeName)
-            : this(data, Encoding.GetEncoding(codeName))
+        public MidiDeserializer(Stream stream, string codeName)
+            : this(stream, Encoding.GetEncoding(codeName))
         {
         }
 
@@ -60,9 +61,9 @@ namespace Midity
         public (MidiFile midiFile, byte[] trackBytes) LoadTrackBytes()
         {
             var (midiFile, trackCount) = LoadMidiFile();
-            var byteCount = _reader.data.Length - _reader.Position;
-            var bytes = new byte[byteCount];
-            Buffer.BlockCopy(_reader.data, (int) _reader.Position, bytes, 0, (int) byteCount);
+            var byteCount = _reader.Length - _reader.Position;
+            var bytes = _reader.ReadBytes((uint) byteCount);
+            _reader.Position -= byteCount;
 
             for (var i = 0; i < trackCount; i++)
                 ReadTrack(i, midiFile);
@@ -76,7 +77,7 @@ namespace Midity
                 throw new FormatException("Can't find track chunk.");
 
             // Chunk length
-            var chunkEnd = _reader.ReadBEUInt(4);
+            long chunkEnd = _reader.ReadBEUInt(4);
             chunkEnd += _reader.Position;
 
             // MIDI event sequence

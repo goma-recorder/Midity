@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using static Midity.NoteKey;
 
@@ -14,13 +15,15 @@ namespace Midity
             return mergedBytes;
         }
 
-        public static byte[] SerializeFile(MidiFile midiFile)
+        private static void Write(this Stream stream, byte[] buffer)
         {
-            var offset = 0;
-            var bytes = new byte[14];
+            stream.Write(buffer, 0, buffer.Length);
+        }
+
+        public static void SerializeFile(MidiFile midiFile, Stream stream)
+        {
             var stringBytes = midiFile.encoding.GetBytes("MThd");
-            Buffer.BlockCopy(stringBytes, 0, bytes, offset, 4);
-            offset += 4;
+            stream.Write(stringBytes);
             // Chunk length
             WriteBEUint(6, 4);
             WriteBEUint(midiFile.format, 2);
@@ -30,158 +33,130 @@ namespace Midity
             void WriteBEUint(uint value, int length)
             {
                 for (var i = 0; i < length; i++)
-                {
-                    bytes[offset] = (byte) ((value >> (8 * (length - i - 1))) & 0xff);
-                    offset++;
-                }
+                    stream.WriteByte((byte) ((value >> (8 * (length - i - 1))) & 0xff));
             }
 
             foreach (var midiTrack in midiFile.Tracks)
-                bytes = Concat(bytes, SerializeTrack(midiTrack, midiFile.encoding));
-
-            return bytes;
+                SerializeTrack(midiTrack, midiFile.encoding, stream);
         }
 
-        internal static byte[] SerializeTrack(MidiTrack midiTrack, Encoding encoding)
+        internal static void SerializeTrack(MidiTrack midiTrack, Encoding encoding, Stream stream)
         {
-            var bytes = new byte[8];
             var stringBytes = encoding.GetBytes("MTrk");
-            Buffer.BlockCopy(stringBytes, 0, bytes, 0, 4);
-            foreach (var mTrkEvent in midiTrack.Events) bytes = Concat(bytes, SerializeEvent(mTrkEvent, encoding));
+            // UnityEngine.Debug.Log(stream.Position);
+            stream.Write(stringBytes);
+            // UnityEngine.Debug.Log(stream.Position);
+            var chunkEndDataPosition = stream.Position;
+            stream.Seek(4, SeekOrigin.Current);
+            // UnityEngine.Debug.Log(stream.Position);
+            foreach (var mTrkEvent in midiTrack.Events) SerializeEvent(mTrkEvent, encoding, stream);
 
-            var chunkEnd = bytes.Length - 8;
+            var chunkEnd = stream.Position - chunkEndDataPosition - 4;
+            stream.Seek(chunkEndDataPosition, SeekOrigin.Begin);
             for (var i = 0; i < 4; i++)
-                bytes[4 + i] = (byte) ((chunkEnd >> (8 * (4 - i - 1))) & 0xff);
-
-            return bytes;
+                stream.WriteByte((byte) ((chunkEnd >> (8 * (4 - i - 1))) & 0xff));
+            stream.Seek(0, SeekOrigin.End);
         }
 
-        internal static byte[] SerializeEvent(MTrkEvent mTrkEvent, Encoding encoding)
+        internal static void SerializeEvent(MTrkEvent mTrkEvent, Encoding encoding, Stream stream)
         {
-            var offset = 0;
-            var length = 0;
-            byte[] bytes;
             switch (mTrkEvent)
             {
                 case NoteEvent noteEvent:
-                    WriteTicks(3);
-                    bytes[offset] = noteEvent.Status;
-                    bytes[++offset] = noteEvent.NoteNumber;
-                    bytes[++offset] = noteEvent.Velocity;
-                    offset++;
-                    return bytes;
+                    WriteEvent(
+                        noteEvent.Status,
+                        noteEvent.NoteNumber,
+                        noteEvent.Velocity);
+                    break;
                 case PolyphonicKeyPressureEvent polyphonicKeyPressureEvent:
-                    WriteTicks(3);
-                    bytes[offset] = polyphonicKeyPressureEvent.Status;
-                    bytes[++offset] = polyphonicKeyPressureEvent.noteNumber;
-                    bytes[++offset] = polyphonicKeyPressureEvent.pressure;
-                    offset++;
-                    return bytes;
+                    WriteEvent(
+                        polyphonicKeyPressureEvent.Status,
+                        polyphonicKeyPressureEvent.noteNumber,
+                        polyphonicKeyPressureEvent.pressure);
+                    break;
                 case ControlChangeEvent controlChangeEvent:
-                    WriteTicks(3);
-                    bytes[offset] = controlChangeEvent.Status;
-                    bytes[++offset] = controlChangeEvent.controlChangeNumber;
-                    bytes[++offset] = controlChangeEvent.data;
-                    offset++;
-                    return bytes;
+                    WriteEvent(
+                        controlChangeEvent.Status,
+                        controlChangeEvent.controlChangeNumber,
+                        controlChangeEvent.data);
+                    break;
                 case ProgramChangeEvent programChangeEvent:
-                    WriteTicks(3);
-                    bytes[offset] = programChangeEvent.Status;
-                    bytes[++offset] = (byte) ((programChangeEvent.programNumber >> 8) & 0xff);
-                    bytes[++offset] = (byte) (programChangeEvent.programNumber & 0xff);
-                    offset++;
-                    return bytes;
+                    WriteEvent(
+                        programChangeEvent.Status,
+                        (byte) ((programChangeEvent.programNumber >> 8) & 0xff),
+                        (byte) (programChangeEvent.programNumber & 0xff));
+                    break;
                 case ChannelPressureEvent channelPressureEvent:
-                    WriteTicks(2);
-                    bytes[offset] = channelPressureEvent.Status;
-                    bytes[++offset] = channelPressureEvent.pressure;
-                    offset++;
-                    return bytes;
+                    WriteEvent(
+                        channelPressureEvent.Status,
+                        channelPressureEvent.pressure);
+                    break;
                 case PitchBendEvent pitchBendEvent:
-                    WriteTicks(3);
-                    bytes[offset] = pitchBendEvent.Status;
-                    bytes[++offset] = pitchBendEvent.byte1;
-                    bytes[++offset] = pitchBendEvent.byte2;
-                    offset++;
-                    return bytes;
+                    WriteEvent(
+                        pitchBendEvent.Status,
+                        pitchBendEvent.byte1,
+                        pitchBendEvent.byte2);
+                    break;
                 case SequenceNumberEvent sequenceNumberEvent:
-                    WriteTicks(5);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = SequenceNumberEvent.EventNumber;
-                    bytes[++offset] = 0x02;
-                    bytes[++offset] = (byte) (sequenceNumberEvent.number >> 8);
-                    bytes[++offset] = (byte) (sequenceNumberEvent.number & 0x00ff);
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        SequenceNumberEvent.EventNumber,
+                        (byte) (sequenceNumberEvent.number >> 8),
+                        (byte) (sequenceNumberEvent.number & 0x00ff));
+                    break;
                 case TextEvent textEvent:
-                    WriteTextEvent(TextEvent.EventNumber, textEvent.text);
-                    return bytes;
+                    WriteTextMetaEvent(TextEvent.EventNumber, textEvent.text);
+                    break;
                 case CopyrightEvent copyrightEvent:
-                    WriteTextEvent(CopyrightEvent.EventNumber, copyrightEvent.text);
-                    return bytes;
+                    WriteTextMetaEvent(CopyrightEvent.EventNumber, copyrightEvent.text);
+                    break;
                 case TrackNameEvent trackNameEvent:
-                    WriteTextEvent(TrackNameEvent.EventNumber, trackNameEvent.name);
-                    return bytes;
+                    WriteTextMetaEvent(TrackNameEvent.EventNumber, trackNameEvent.name);
+                    break;
                 case InstrumentNameEvent instrumentNameEvent:
-                    WriteTextEvent(InstrumentNameEvent.EventNumber, instrumentNameEvent.name);
-                    return bytes;
+                    WriteTextMetaEvent(InstrumentNameEvent.EventNumber, instrumentNameEvent.name);
+                    break;
                 case LyricEvent lyricEvent:
-                    WriteTextEvent(LyricEvent.EventNumber, lyricEvent.lyric);
-                    return bytes;
+                    WriteTextMetaEvent(LyricEvent.EventNumber, lyricEvent.lyric);
+                    break;
                 case MarkerEvent markerEvent:
-                    WriteTextEvent(MarkerEvent.EventNumber, markerEvent.text);
-                    return bytes;
+                    WriteTextMetaEvent(MarkerEvent.EventNumber, markerEvent.text);
+                    break;
                 case QueueEvent queueEvent:
-                    WriteTextEvent(QueueEvent.EventNumber, queueEvent.text);
-                    return bytes;
+                    WriteTextMetaEvent(QueueEvent.EventNumber, queueEvent.text);
+                    break;
                 case ChannelPrefixEvent channelPrefixEvent:
-                    WriteTicks(4);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = ChannelPrefixEvent.EventNumber;
-                    bytes[++offset] = 1;
-                    bytes[++offset] = channelPrefixEvent.data;
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        ChannelPrefixEvent.EventNumber,
+                        channelPrefixEvent.data);
+                    break;
                 case EndPointEvent endPointEvent:
-                    WriteTicks(3);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = EndPointEvent.EventNumber;
-                    bytes[++offset] = 0;
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        EndPointEvent.EventNumber);
+                    break;
                 case TempoEvent tempoEvent:
-                    WriteTicks(6);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = TempoEvent.EventNumber;
-                    bytes[++offset] = 3;
-                    bytes[++offset] = (byte) ((tempoEvent.TickTempo >> 16) & 0xff);
-                    bytes[++offset] = (byte) ((tempoEvent.TickTempo >> 8) & 0xff);
-                    bytes[++offset] = (byte) (tempoEvent.TickTempo & 0xff);
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        TempoEvent.EventNumber,
+                        (byte) ((tempoEvent.TickTempo >> 16) & 0xff),
+                        (byte) ((tempoEvent.TickTempo >> 8) & 0xff),
+                        (byte) (tempoEvent.TickTempo & 0xff));
+                    break;
                 case SmpteOffsetEvent smpteOffsetEvent:
-                    WriteTicks(8);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = SmpteOffsetEvent.EventNumber;
-                    bytes[++offset] = 5;
-                    bytes[++offset] = smpteOffsetEvent.hr;
-                    bytes[++offset] = smpteOffsetEvent.mn;
-                    bytes[++offset] = smpteOffsetEvent.se;
-                    bytes[++offset] = smpteOffsetEvent.fr;
-                    bytes[++offset] = smpteOffsetEvent.ff;
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        SmpteOffsetEvent.EventNumber,
+                        smpteOffsetEvent.hr,
+                        smpteOffsetEvent.mn,
+                        smpteOffsetEvent.se,
+                        smpteOffsetEvent.fr,
+                        smpteOffsetEvent.ff);
+                    break;
                 case BeatEvent beatEvent:
-                    WriteTicks(7);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = BeatEvent.EventNumber;
-                    bytes[++offset] = 4;
-                    bytes[++offset] = beatEvent.nn;
-                    bytes[++offset] = beatEvent.dd;
-                    bytes[++offset] = beatEvent.cc;
-                    bytes[++offset] = beatEvent.bb;
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        BeatEvent.EventNumber,
+                        beatEvent.nn,
+                        beatEvent.dd,
+                        beatEvent.cc,
+                        beatEvent.bb);
+                    break;
                 case KeyEvent keyEvent:
                     sbyte keyNumber = 0;
                     switch (keyEvent.noteKey)
@@ -248,84 +223,56 @@ namespace Midity
                             break;
                     }
 
-                    WriteTicks(5);
-                    bytes[offset] = 0xff;
-                    bytes[++offset] = KeyEvent.EventNumber;
-                    bytes[++offset] = 2;
-                    bytes[++offset] = (byte) keyNumber;
-                    bytes[++offset] = (byte) (keyEvent.noteKey.IsMajor() ? 0 : 1);
-                    offset++;
-                    return bytes;
+                    WriteBytesDataMetaEvent(
+                        KeyEvent.EventNumber,
+                        (byte) keyNumber,
+                        (byte) (keyEvent.noteKey.IsMajor() ? 0 : 1));
+                    break;
                 case SequencerUniqueEvent sequencerUniqueEvent:
-                    WriteBytesDataEvent(sequencerUniqueEvent.data, 0xff, SequencerUniqueEvent.EventNumber);
-                    return bytes;
+                    WriteBytesDataMetaEvent(SequencerUniqueEvent.EventNumber, sequencerUniqueEvent.data);
+                    break;
                 case UnknownMetaEvent unknownEvent:
-                    WriteBytesDataEvent(unknownEvent.data, 0xff, unknownEvent.eventNumber);
-                    return bytes;
+                    WriteBytesDataMetaEvent(unknownEvent.eventNumber, unknownEvent.data);
+                    break;
                 case SysExEvent sysExEvent:
                     var sysExData = new byte[sysExEvent.data.Length + 1];
                     Buffer.BlockCopy(sysExEvent.data, 0, sysExData, 0, sysExEvent.data.Length);
                     sysExData[sysExData.Length - 1] = 0xf7;
-                    WriteBytesDataEvent(sysExData, 0xf0);
-                    return bytes;
-                default:
-                    return null;
+                    var dataLengthBytes = ToMultiBytes((uint) sysExData.Length);
+                    WriteEvent(0xf0, Concat(dataLengthBytes, sysExData));
+                    break;
             }
 
-            void WriteTicks(int dataLength)
+            void WriteEvent(byte status, params byte[] data)
             {
                 var tickBytes = ToMultiBytes(mTrkEvent.Ticks);
-                var tickBytesLength = tickBytes.Length;
-                length = tickBytesLength + dataLength;
-                bytes = new byte[length];
-                Buffer.BlockCopy(tickBytes, 0, bytes, offset, tickBytesLength);
-                offset += tickBytesLength;
+                stream.Write(tickBytes);
+                stream.WriteByte(status);
+                stream.Write(data);
             }
 
-            void WriteTextEvent(byte eventNumber, string text)
+            void WriteMetaEvent(byte eventNumber, params byte[] data)
             {
-                var tickBytes = ToMultiBytes(mTrkEvent.Ticks);
-                var tickBytesLength = tickBytes.Length;
+                data = new byte[data.Length + 1];
+                data[0] = eventNumber;
+                WriteEvent(0xff, data);
+            }
+
+            void WriteTextMetaEvent(byte eventNumber, string text)
+            {
+                WriteMetaEvent(eventNumber);
                 var textBytes = encoding.GetBytes(text);
-                var textBytesLength = textBytes.Length;
                 var textLengthBytes = ToMultiBytes((uint) textBytes.Length);
-                var textLengthBytesLength = textLengthBytes.Length;
-                length = tickBytesLength + 2 + textLengthBytesLength + textBytesLength;
-                bytes = new byte[length];
-
-                Buffer.BlockCopy(tickBytes, 0, bytes, offset, tickBytesLength);
-                offset += tickBytesLength;
-
-
-                bytes[offset] = 0xff;
-                bytes[++offset] = eventNumber;
-                offset++;
-
-                Buffer.BlockCopy(textLengthBytes, 0, bytes, offset, textLengthBytesLength);
-                offset += textLengthBytesLength;
-
-                Buffer.BlockCopy(textBytes, 0, bytes, offset, textBytesLength);
-                offset += textBytesLength;
+                stream.Write(textLengthBytes);
+                stream.Write(textBytes);
             }
 
-            void WriteBytesDataEvent(byte[] data, params byte[] statusData)
+            void WriteBytesDataMetaEvent(byte eventNumber, params byte[] data)
             {
-                var dataLength = data.Length;
-                var dataLengthBytes = ToMultiBytes((uint) dataLength);
-                var dataLengthBytesLength = dataLengthBytes.Length;
-
-                var statusDataLength = statusData.Length;
-
-                WriteTicks(statusDataLength + dataLengthBytesLength + dataLength);
-
-                Buffer.BlockCopy(statusData, 0, bytes, offset, statusDataLength);
-                offset += statusDataLength;
-
-                Buffer.BlockCopy(dataLengthBytes, 0, bytes, offset, dataLengthBytesLength);
-                offset += dataLengthBytesLength;
-
-                Buffer.BlockCopy(data, 0, bytes, offset, dataLength);
-                offset += dataLength;
+                WriteMetaEvent(eventNumber);
+                var dataLengthBytes = ToMultiBytes((uint) data.Length);
+                stream.Write(dataLengthBytes);
+                stream.Write(data);
             }
         }
 

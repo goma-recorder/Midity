@@ -7,28 +7,59 @@ namespace Midity.Tests
 {
     public class SerializerTest
     {
-        private const string CodeName = "shift_jis";
+        private const string CodeName = "utf-8";
 
-        public class MidiFile
+        public class File
         {
             [Test]
             public void SerializeMidiFile()
             {
                 var path = Directory.GetCurrentDirectory() +
                            "/Packages/jp.goma_recorder.midity/Tests/Runtime/Sample.mid";
-                var bytes1 = File.ReadAllBytes(path);
-                var midiFile1 = new MidiDeserializer(bytes1, CodeName).Load();
-                var bytes2 = MidiSerializer.SerializeFile(midiFile1);
-                var midiFile2 = new MidiDeserializer(bytes2, CodeName).Load();
-                Assert.That(midiFile1.Tracks.Count == midiFile2.Tracks.Count);
-
-                for (var i = 0; i < midiFile1.Tracks.Count; i++)
+                using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    Assert.That(midiFile1.Tracks[i].Events.Count == midiFile2.Tracks[i].Events.Count);
-                    for (var j = 0; j < midiFile1.Tracks[i].Events.Count; j++)
-                        Assert.That(
-                            midiFile1.Tracks[i].Events[j].ToString() == midiFile2.Tracks[i].Events[j].ToString());
+                    var memoryStream = new MemoryStream();
+                    fileStream.CopyTo(memoryStream);
+                    var midiFile1 = new MidiDeserializer(memoryStream, CodeName).Load();
+                    using (memoryStream)
+                    {
+                        MidiSerializer.SerializeFile(midiFile1, memoryStream);
+                        var midiFile2 = new MidiDeserializer(memoryStream, CodeName).Load();
+                        Assert.That(midiFile1.Tracks.Count == midiFile2.Tracks.Count);
+
+                        for (var i = 0; i < midiFile1.Tracks.Count; i++)
+                        {
+                            Assert.That(midiFile1.Tracks[i].Events.Count == midiFile2.Tracks[i].Events.Count);
+                            for (var j = 0; j < midiFile1.Tracks[i].Events.Count; j++)
+                                Assert.That(
+                                    midiFile1.Tracks[i].Events[j].ToString() ==
+                                    midiFile2.Tracks[i].Events[j].ToString());
+                        }
+                    }
                 }
+            }
+        }
+
+        public class Track
+        {
+            [Test]
+            public void SerializeTrack()
+            {
+                var track1 = new MidiTrack("Name", 94);
+                MidiTrack track2;
+                using (var stream = new MemoryStream())
+                {
+                    var encoding = Encoding.GetEncoding(CodeName);
+                    MidiSerializer.SerializeTrack(track1, encoding, stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var midiFIle = new MidiFile(94, encoding);
+                    new MidiDeserializer(stream, encoding).ReadTrack(0, midiFIle);
+                    track2 = midiFIle.Tracks[0];
+                }
+
+                Assert.That(track1.Events.Count == track2.Events.Count);
+                for (var i = 0; i < track1.Events.Count; i++)
+                    Assert.That(track1.Events[i].ToString() == track2.Events[i].ToString());
             }
         }
 
@@ -37,10 +68,15 @@ namespace Midity.Tests
             private static T ReDeserialize<T>(T mTrkEvent) where T : MTrkEvent
             {
                 var encoding = Encoding.GetEncoding(CodeName);
-                var bytes = MidiSerializer.SerializeEvent(mTrkEvent, encoding);
-                var deserializer = new MidiDeserializer(bytes, encoding);
-                byte status = 0;
-                return (T) deserializer.ReadEvent(ref status);
+                using (var stream = new MemoryStream())
+                {
+                    MidiSerializer.SerializeEvent(mTrkEvent, encoding, stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    // stream.Read(bytes, 0, (int) stream.Length);
+                    var deserializer = new MidiDeserializer(stream, encoding);
+                    byte status = 0;
+                    return (T) deserializer.ReadEvent(ref status);
+                }
             }
 
             private byte GetRandomByte()

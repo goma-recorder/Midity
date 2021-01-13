@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 namespace Midity
@@ -20,9 +21,12 @@ namespace Midity
                 if (_midiFile != null) return _midiFile;
 
                 _midiFile = new MidiFile(deltaTime, codePage, format);
-                var deserializer = new MidiDeserializer(trackBytes, codePage);
-                for (var i = 0; i < trackCount; i++)
-                    deserializer.ReadTrack(i, _midiFile);
+                using (var stream = new MemoryStream(trackBytes))
+                {
+                    var deserializer = new MidiDeserializer(stream, codePage);
+                    for (var i = 0; i < trackCount; i++)
+                        deserializer.ReadTrack(i, _midiFile);
+                }
 
                 return _midiFile;
             }

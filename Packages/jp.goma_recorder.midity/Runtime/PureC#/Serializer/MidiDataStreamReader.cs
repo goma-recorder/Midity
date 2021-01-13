@@ -1,5 +1,5 @@
-using System;
 using System.Text;
+using System.IO;
 
 namespace Midity
 {
@@ -8,9 +8,10 @@ namespace Midity
     {
         #region Constructor
 
-        internal MidiDataStreamReader(byte[] data, Encoding encoding)
+        internal MidiDataStreamReader(Stream stream, Encoding encoding)
         {
-            this.data = data;
+            _stream = stream;
+            _stream.Position = 0;
             this.encoding = encoding;
         }
 
@@ -18,19 +19,20 @@ namespace Midity
 
         #region Internal members
 
-        internal readonly byte[] data;
-        internal readonly Encoding encoding;
+        private readonly Stream _stream;
+        public readonly Encoding encoding;
 
         #endregion
 
         #region Current reading position
 
-        public uint Position { get; private set; }
-
-        public void Advance(uint delta)
+        public long Position
         {
-            Position += delta;
+            get => _stream.Position;
+            set => _stream.Position = value;
         }
+
+        public long Length => _stream.Length;
 
         #endregion
 
@@ -38,19 +40,20 @@ namespace Midity
 
         public byte PeekByte()
         {
-            return data[Position];
+            var data = ReadByte();
+            _stream.Position--;
+            return data;
         }
 
         public byte ReadByte()
         {
-            return data[Position++];
+            return (byte) _stream.ReadByte();
         }
 
         public byte[] ReadBytes(uint len)
         {
             var bytes = new byte[len];
-            Buffer.BlockCopy(data, (int) Position, bytes, 0, (int) len);
-            Position += len;
+            _stream.Read(bytes, 0, (int) len);
             return bytes;
         }
 

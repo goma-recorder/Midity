@@ -17,13 +17,21 @@ namespace Midity
         {
         }
 
+        public TempoEvent(float tempo) : this((uint) (60000000f / tempo))
+        {
+        }
+
         public uint TickTempo
         {
             get => _tickTempo;
-            set => _tickTempo = Math.Min(Math.Max(0u, value), 0xff_ff_ff);
+            internal set => _tickTempo = Math.Min(Math.Max(0u, value), 0xff_ff_ff);
         }
 
-        public float Tempo => 60000000f / TickTempo;
+        public float Tempo
+        {
+            get => 60000000f / TickTempo;
+            internal set => _tickTempo = (uint) (60000000f / value);
+        }
 
         protected override Type ToString(List<string> list)
         {

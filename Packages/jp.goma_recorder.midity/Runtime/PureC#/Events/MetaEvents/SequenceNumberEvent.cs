@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class SequenceNumberEvent : MTrkEvent
+    public sealed class SequenceNumberEvent : MetaEvent
     {
-        public const byte EventNumber = 0x00;
+        public const byte MetaNumber = 0x00;
+        public override byte MetaId => MetaNumber;
         public ushort number;
 
         internal SequenceNumberEvent(uint ticks, ushort number) : base(ticks)

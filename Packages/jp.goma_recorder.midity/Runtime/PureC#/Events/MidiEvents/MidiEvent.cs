@@ -14,12 +14,8 @@ namespace Midity
         public byte Channel
         {
             get => _channel;
-            internal set
-            {
-                if (value > 16)
-                    throw new Exception("Numeric value out of range.(0-16)");
-                _channel = value;
-            }
+            internal set =>
+                SetIfInRange(nameof(Channel), out _channel, value, 16);
         }
     }
 }

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class QueueEvent : MTrkEvent
+    public sealed class QueueEvent : MetaEvent
     {
-        public const byte EventNumber = 0x07;
+        public const byte MetaNumber = 0x07;
+        public override byte MetaId => MetaNumber;
         public string text;
 
         internal QueueEvent(uint ticks, string text) : base(ticks)

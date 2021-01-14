@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class CopyrightEvent : MTrkEvent
+    public sealed class CopyrightEvent : MetaEvent
     {
-        public const byte EventNumber = 0x02;
+        public const byte MetaNumber = 0x02;
+        public override byte MetaId => MetaNumber;
         public string text;
 
         internal CopyrightEvent(uint ticks, string text) : base(ticks)

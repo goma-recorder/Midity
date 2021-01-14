@@ -24,5 +24,33 @@ namespace Midity
             sb.Append(string.Join(", ", list));
             return sb.ToString();
         }
+
+        private static void ThrowException(string name, long input, long min, long max)
+        {
+            if (input < min || max < input)
+                throw new Exception($"{name} is outside of range.({min}-{max})");
+        }
+
+        protected static void SetIfInRange(string name, out byte target, byte input, byte max)
+        {
+            SetIfInRange(name, out target, input, 0, max);
+        }
+
+        protected static void SetIfInRange(string name, out byte target, byte input, byte min, byte max)
+        {
+            ThrowException(name, input, min, max);
+            target = input;
+        }
+
+        protected static void SetIfInRange(string name, out uint target, uint input, uint max)
+        {
+            SetIfInRange(name, out target, input, 0, max);
+        }
+
+        protected static void SetIfInRange(string name, out uint target, uint input, uint min, uint max)
+        {
+            ThrowException(name, input, min, max);
+            target = input;
+        }
     }
 }

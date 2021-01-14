@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class LyricEvent : MTrkEvent
+    public sealed class LyricEvent : MetaEvent
     {
-        public const byte EventNumber = 0x05;
+        public const byte MetaNumber = 0x05;
+        public override byte MetaId => MetaNumber;
         public string lyric;
 
         internal LyricEvent(uint ticks, string lyric) : base(ticks)

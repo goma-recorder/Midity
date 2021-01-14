@@ -99,50 +99,61 @@ namespace Midity
                     break;
                 case SequenceNumberEvent sequenceNumberEvent:
                     WriteBytesDataMetaEvent(
-                        SequenceNumberEvent.EventNumber,
+                        sequenceNumberEvent,
                         (byte) (sequenceNumberEvent.number >> 8),
                         (byte) (sequenceNumberEvent.number & 0x00ff));
                     break;
                 case TextEvent textEvent:
-                    WriteTextMetaEvent(TextEvent.EventNumber, textEvent.text);
+                    WriteTextMetaEvent(textEvent, textEvent.text);
                     break;
                 case CopyrightEvent copyrightEvent:
-                    WriteTextMetaEvent(CopyrightEvent.EventNumber, copyrightEvent.text);
+                    WriteTextMetaEvent(copyrightEvent, copyrightEvent.text);
                     break;
                 case TrackNameEvent trackNameEvent:
-                    WriteTextMetaEvent(TrackNameEvent.EventNumber, trackNameEvent.name);
+                    WriteTextMetaEvent(trackNameEvent, trackNameEvent.name);
                     break;
                 case InstrumentNameEvent instrumentNameEvent:
-                    WriteTextMetaEvent(InstrumentNameEvent.EventNumber, instrumentNameEvent.name);
+                    WriteTextMetaEvent(instrumentNameEvent, instrumentNameEvent.name);
                     break;
                 case LyricEvent lyricEvent:
-                    WriteTextMetaEvent(LyricEvent.EventNumber, lyricEvent.lyric);
+                    WriteTextMetaEvent(lyricEvent, lyricEvent.lyric);
                     break;
                 case MarkerEvent markerEvent:
-                    WriteTextMetaEvent(MarkerEvent.EventNumber, markerEvent.text);
+                    WriteTextMetaEvent(markerEvent, markerEvent.text);
                     break;
                 case QueueEvent queueEvent:
-                    WriteTextMetaEvent(QueueEvent.EventNumber, queueEvent.text);
+                    WriteTextMetaEvent(queueEvent, queueEvent.text);
+                    break;
+                case ProgramNameEvent programNameEvent:
+                    WriteTextMetaEvent(programNameEvent, programNameEvent.name);
+                    break;
+                case DeviceNameEvent deviceNameEvent:
+                    WriteTextMetaEvent(deviceNameEvent, deviceNameEvent.name);
                     break;
                 case ChannelPrefixEvent channelPrefixEvent:
                     WriteBytesDataMetaEvent(
-                        ChannelPrefixEvent.EventNumber,
+                        channelPrefixEvent,
                         channelPrefixEvent.data);
+                    break;
+                case PortNumberEvent portNumberEvent:
+                    WriteBytesDataMetaEvent(
+                        portNumberEvent,
+                        portNumberEvent.Number);
                     break;
                 case EndPointEvent endPointEvent:
                     WriteBytesDataMetaEvent(
-                        EndPointEvent.EventNumber);
+                        endPointEvent);
                     break;
                 case TempoEvent tempoEvent:
                     WriteBytesDataMetaEvent(
-                        TempoEvent.EventNumber,
+                        tempoEvent,
                         (byte) ((tempoEvent.TickTempo >> 16) & 0xff),
                         (byte) ((tempoEvent.TickTempo >> 8) & 0xff),
                         (byte) (tempoEvent.TickTempo & 0xff));
                     break;
                 case SmpteOffsetEvent smpteOffsetEvent:
                     WriteBytesDataMetaEvent(
-                        SmpteOffsetEvent.EventNumber,
+                        smpteOffsetEvent,
                         smpteOffsetEvent.hr,
                         smpteOffsetEvent.mn,
                         smpteOffsetEvent.se,
@@ -151,88 +162,23 @@ namespace Midity
                     break;
                 case BeatEvent beatEvent:
                     WriteBytesDataMetaEvent(
-                        BeatEvent.EventNumber,
-                        beatEvent.nn,
-                        beatEvent.dd,
-                        beatEvent.cc,
-                        beatEvent.bb);
+                        beatEvent,
+                        beatEvent.numerator,
+                        beatEvent.denominator,
+                        beatEvent.midiClocksPerClick,
+                        beatEvent.numberOfNotated32nds);
                     break;
                 case KeyEvent keyEvent:
-                    sbyte keyNumber = 0;
-                    switch (keyEvent.noteKey)
-                    {
-                        case CFlatMajor:
-                        case AFlatMinor:
-                            keyNumber = -7;
-                            break;
-                        case GFlatMajor:
-                        case EFlatMinor:
-                            keyNumber = -6;
-                            break;
-                        case DFlatMajor:
-                        case BFlatMinor:
-                            keyNumber = -5;
-                            break;
-                        case AFlatMajor:
-                        case FMinor:
-                            keyNumber = -4;
-                            break;
-                        case EFlatMajor:
-                        case CMinor:
-                            keyNumber = -3;
-                            break;
-                        case BFlatMajor:
-                        case GMinor:
-                            keyNumber = -2;
-                            break;
-                        case FMajor:
-                        case DMinor:
-                            keyNumber = -1;
-                            break;
-                        case CMajor:
-                        case AMinor:
-                            keyNumber = 0;
-                            break;
-                        case GMajor:
-                        case EMinor:
-                            keyNumber = 1;
-                            break;
-                        case DMajor:
-                        case BMinor:
-                            keyNumber = 2;
-                            break;
-                        case AMajor:
-                        case FSharpMinor:
-                            keyNumber = 3;
-                            break;
-                        case EMajor:
-                        case CSharpMinor:
-                            keyNumber = 4;
-                            break;
-                        case BMajor:
-                        case GSharpMinor:
-                            keyNumber = 5;
-                            break;
-                        case FSharpMajor:
-                        case DSharpMinor:
-                            keyNumber = 6;
-                            break;
-                        case CSharpMajor:
-                        case ASharpMinor:
-                            keyNumber = 7;
-                            break;
-                    }
-
                     WriteBytesDataMetaEvent(
-                        KeyEvent.EventNumber,
-                        (byte) keyNumber,
-                        (byte) (keyEvent.noteKey.IsMajor() ? 0 : 1));
+                        keyEvent,
+                        (byte) keyEvent.KeyAccidentalSign,
+                        (byte) keyEvent.Tonality);
                     break;
                 case SequencerUniqueEvent sequencerUniqueEvent:
-                    WriteBytesDataMetaEvent(SequencerUniqueEvent.EventNumber, sequencerUniqueEvent.data);
+                    WriteBytesDataMetaEvent(sequencerUniqueEvent, sequencerUniqueEvent.data);
                     break;
                 case UnknownMetaEvent unknownEvent:
-                    WriteBytesDataMetaEvent(unknownEvent.eventNumber, unknownEvent.data);
+                    WriteBytesDataMetaEvent(unknownEvent, unknownEvent.data);
                     break;
                 case SysExEvent sysExEvent:
                     var sysExData = new byte[sysExEvent.data.Length + 1];
@@ -251,25 +197,25 @@ namespace Midity
                 stream.Write(data);
             }
 
-            void WriteMetaEvent(byte eventNumber, params byte[] data)
+            void WriteMetaEvent(MetaEvent metaEvent, params byte[] data)
             {
                 data = new byte[data.Length + 1];
-                data[0] = eventNumber;
+                data[0] = metaEvent.MetaId;
                 WriteEvent(0xff, data);
             }
 
-            void WriteTextMetaEvent(byte eventNumber, string text)
+            void WriteTextMetaEvent(MetaEvent metaEvent, string text)
             {
-                WriteMetaEvent(eventNumber);
+                WriteMetaEvent(metaEvent);
                 var textBytes = encoding.GetBytes(text);
                 var textLengthBytes = ToMultiBytes((uint) textBytes.Length);
                 stream.Write(textLengthBytes);
                 stream.Write(textBytes);
             }
 
-            void WriteBytesDataMetaEvent(byte eventNumber, params byte[] data)
+            void WriteBytesDataMetaEvent(MetaEvent metaEvent, params byte[] data)
             {
-                WriteMetaEvent(eventNumber);
+                WriteMetaEvent(metaEvent);
                 var dataLengthBytes = ToMultiBytes((uint) data.Length);
                 stream.Write(dataLengthBytes);
                 stream.Write(data);

@@ -4,9 +4,10 @@ using System.Linq;
 
 namespace Midity
 {
-    public sealed class SequencerUniqueEvent : MTrkEvent
+    public sealed class SequencerUniqueEvent : MetaEvent
     {
-        public const byte EventNumber = 0x7f;
+        public const byte MetaNumber = 0x7f;
+        public override byte MetaId => MetaNumber;
         public byte[] data;
 
         internal SequencerUniqueEvent(uint ticks, byte[] data) : base(ticks)

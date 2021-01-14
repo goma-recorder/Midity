@@ -286,6 +286,32 @@ namespace Midity.Tests
             }
 
             [Test]
+            public void ProgramNameEvent()
+            {
+                var value = GetRandomValue();
+                var name = "nname";
+
+                var x = new ProgramNameEvent(value.ticks, name);
+                var y = ReDeserialize(x);
+
+                Assert.That(x.Ticks == y.Ticks);
+                Assert.That(x.name == y.name);
+            }
+
+            [Test]
+            public void DeviceNameEvent()
+            {
+                var value = GetRandomValue();
+                var name = "nname";
+
+                var x = new DeviceNameEvent(value.ticks, name);
+                var y = ReDeserialize(x);
+
+                Assert.That(x.Ticks == y.Ticks);
+                Assert.That(x.name == y.name);
+            }
+
+            [Test]
             public void ChannelPrefixEvent()
             {
                 var ticks = 200836u;
@@ -296,6 +322,18 @@ namespace Midity.Tests
 
                 Assert.That(x.Ticks == y.Ticks);
                 Assert.That(x.data == y.data);
+            }
+
+            [Test]
+            public void PortNumberEvent()
+            {
+                var value = GetRandomValue();
+
+                var x = new PortNumberEvent(value.ticks, 129);
+                var y = ReDeserialize(x);
+
+                Assert.That(x.Ticks == y.Ticks);
+                Assert.That(x.Number == y.Number);
             }
 
             [Test]
@@ -355,10 +393,10 @@ namespace Midity.Tests
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
-                Assert.That(x.nn == y.nn);
-                Assert.That(x.dd == y.dd);
-                Assert.That(x.cc == y.cc);
-                Assert.That(x.bb == y.bb);
+                Assert.That(x.numerator == y.numerator);
+                Assert.That(x.denominator == y.denominator);
+                Assert.That(x.midiClocksPerClick == y.midiClocksPerClick);
+                Assert.That(x.numberOfNotated32nds == y.numberOfNotated32nds);
             }
 
             [Test]
@@ -398,7 +436,7 @@ namespace Midity.Tests
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
-                Assert.That(x.eventNumber == y.eventNumber);
+                Assert.That(x.metaId == y.metaId);
                 Assert.That(x.data.SequenceEqual(y.data));
             }
 

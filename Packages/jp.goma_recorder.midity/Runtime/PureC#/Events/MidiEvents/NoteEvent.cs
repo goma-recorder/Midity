@@ -28,12 +28,8 @@ namespace Midity
         public byte NoteNumber
         {
             get => _noteNumber;
-            internal set
-            {
-                if (value > 131)
-                    throw new Exception("Numeric value out of range.(0-131)");
-                _noteNumber = value;
-            }
+            internal set =>
+                SetIfInRange(nameof(NoteNumber), out _noteNumber, value, 131);
         }
 
         public NoteName NoteName

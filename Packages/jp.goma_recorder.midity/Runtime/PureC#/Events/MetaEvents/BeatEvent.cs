@@ -3,35 +3,38 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class BeatEvent : MTrkEvent
+    public sealed class BeatEvent : MetaEvent
     {
-        public const byte EventNumber = 0x58;
-        public byte nn;
-        public byte dd;
-        public byte cc;
-        public byte bb;
+        public const byte MetaNumber = 0x58;
+        public override byte MetaId => MetaNumber;
+        public byte numerator;
+        public byte denominator;
+        public byte midiClocksPerClick;
+        public byte numberOfNotated32nds;
 
-        internal BeatEvent(uint ticks, byte nn, byte dd, byte cc, byte bb) : base(ticks)
+        internal BeatEvent(uint ticks, byte numerator, byte denominator, byte midiClocksPerClick,
+            byte numberOfNotated32nds) : base(ticks)
         {
-            this.nn = nn;
-            this.dd = dd;
-            this.cc = cc;
-            this.bb = bb;
+            this.numerator = numerator;
+            this.denominator = denominator;
+            this.midiClocksPerClick = midiClocksPerClick;
+            this.numberOfNotated32nds = numberOfNotated32nds;
         }
 
-        public BeatEvent(byte nn, byte dd, byte cc, byte bb) : this(0, nn, dd, cc, bb)
+        public BeatEvent(byte numerator, byte denominator, byte midiClocksPerClick, byte numberOfNotated32nds) : this(0,
+            numerator, denominator, midiClocksPerClick, numberOfNotated32nds)
         {
         }
 
-        public byte TopNumber => nn;
-        public byte BottomNumber => (byte) Math.Pow(2, dd);
+        public byte TopNumber => numerator;
+        public byte BottomNumber => (byte) Math.Pow(2, denominator);
 
         protected override Type ToString(List<string> list)
         {
-            list.Add(nn.ToString());
-            list.Add(dd.ToString());
-            list.Add(cc.ToString());
-            list.Add(bb.ToString());
+            list.Add(numerator.ToString());
+            list.Add(denominator.ToString());
+            list.Add(midiClocksPerClick.ToString());
+            list.Add(numberOfNotated32nds.ToString());
             return typeof(BeatEvent);
         }
     }

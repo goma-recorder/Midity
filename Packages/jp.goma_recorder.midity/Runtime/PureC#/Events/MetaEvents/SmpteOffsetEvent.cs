@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class SmpteOffsetEvent : MTrkEvent
+    public sealed class SmpteOffsetEvent : MetaEvent
     {
-        public const byte EventNumber = 0x54;
+        public const byte MetaNumber = 0x54;
+        public override byte MetaId => MetaNumber;
         public byte ff;
         public byte fr;
         public byte hr;

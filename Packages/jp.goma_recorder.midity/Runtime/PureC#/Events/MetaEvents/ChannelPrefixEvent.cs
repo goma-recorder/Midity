@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class ChannelPrefixEvent : MTrkEvent
+    public sealed class ChannelPrefixEvent : MetaEvent
     {
-        public const byte EventNumber = 0x20;
+        public const byte MetaNumber = 0x20;
+        public override byte MetaId => MetaNumber;
         public byte data;
 
         internal ChannelPrefixEvent(uint ticks, byte data) : base(ticks)

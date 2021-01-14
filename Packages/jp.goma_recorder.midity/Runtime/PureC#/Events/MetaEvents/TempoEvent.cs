@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class TempoEvent : MTrkEvent
+    public sealed class TempoEvent : MetaEvent
     {
-        public const byte EventNumber = 0x51;
+        public const byte MetaNumber = 0x51;
+        public override byte MetaId => MetaNumber;
         private uint _tickTempo;
 
         internal TempoEvent(uint ticks, uint tickTempo) : base(ticks)
@@ -24,7 +25,8 @@ namespace Midity
         public uint TickTempo
         {
             get => _tickTempo;
-            internal set => _tickTempo = Math.Min(Math.Max(0u, value), 0xff_ff_ff);
+            internal set
+                => SetIfInRange(nameof(TickTempo), out _tickTempo, value, 0xff_ff_ff);
         }
 
         public float Tempo

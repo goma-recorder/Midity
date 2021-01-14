@@ -92,149 +92,101 @@ namespace Midity
             midiFile.AddTrack(trackNumber, events);
         }
 
-        internal MTrkEvent ReadEvent(ref byte stat)
+        internal MTrkEvent ReadEvent(ref byte status)
         {
             // Delta time
             var ticks = _reader.ReadMultiByteValue();
 
             // Status byte
             if ((_reader.PeekByte() & 0x80u) != 0)
-                stat = _reader.ReadByte();
+                status = _reader.ReadByte();
+            else if (status == 0)
+                throw new Exception("Status byte required for running status.");
 
-            switch (stat)
+            switch (status)
             {
+                case var stat when 0x80 <= stat && stat <= 0xef:
+                    var channel = (byte) (status & 0x0f);
+                    return ReadMidiEvent(ticks, status, channel);
                 case 0xff:
-                    var eventNumber = _reader.ReadByte();
+                    var metaNumber = _reader.ReadByte();
                     var length = _reader.ReadMultiByteValue();
-                    return ReadMetaEvent(ticks, eventNumber, length);
+                    return ReadMetaEvent(ticks, metaNumber, length);
                 case 0xf0:
                     return ReadSysExEvent(ticks);
                 default:
-                    var channel = (byte) (stat & 0x0f);
-                    return ReadMidiEvent(ticks, stat, channel);
+                    throw new Exception("Invalid status byte found.");
             }
         }
 
-        private MTrkEvent ReadMetaEvent(uint ticks, byte eventNumber, uint length)
+        private MTrkEvent ReadMetaEvent(uint ticks, byte metaNumber, uint length)
         {
             byte[] bytes;
-            switch (eventNumber)
+            switch (metaNumber)
             {
                 // 00
-                case SequenceNumberEvent.EventNumber:
+                case SequenceNumberEvent.MetaNumber:
                     bytes = _reader.ReadBytes(length);
                     var number = (ushort) ((bytes[0] << 8) | bytes[1]);
                     return new SequenceNumberEvent(ticks, number);
                 // 01
-                case TextEvent.EventNumber:
+                case TextEvent.MetaNumber:
                     return new TextEvent(ticks, _reader.ReadChars(length));
                 // 02
-                case CopyrightEvent.EventNumber:
+                case CopyrightEvent.MetaNumber:
                     return new CopyrightEvent(ticks, _reader.ReadChars(length));
                 // 03
-                case TrackNameEvent.EventNumber:
+                case TrackNameEvent.MetaNumber:
                     return new TrackNameEvent(ticks, _reader.ReadChars(length));
                 // 04
-                case InstrumentNameEvent.EventNumber:
+                case InstrumentNameEvent.MetaNumber:
                     return new InstrumentNameEvent(ticks, _reader.ReadChars(length));
                 // 05
-                case LyricEvent.EventNumber:
+                case LyricEvent.MetaNumber:
                     return new LyricEvent(ticks, _reader.ReadChars(length));
                 // 06
-                case MarkerEvent.EventNumber:
+                case MarkerEvent.MetaNumber:
                     return new MarkerEvent(ticks, _reader.ReadChars(length));
                 // 07
-                case QueueEvent.EventNumber:
+                case QueueEvent.MetaNumber:
                     return new QueueEvent(ticks, _reader.ReadChars(length));
+                // 08
+                case ProgramNameEvent.MetaNumber:
+                    return new ProgramNameEvent(ticks, _reader.ReadChars(length));
+                // 09
+                case DeviceNameEvent.MetaNumber:
+                    return new DeviceNameEvent(ticks, _reader.ReadChars(length));
                 // 20
-                case ChannelPrefixEvent.EventNumber:
+                case ChannelPrefixEvent.MetaNumber:
                     return new ChannelPrefixEvent(ticks, _reader.ReadByte());
+                // 21
+                case PortNumberEvent.MetaNumber:
+                    return new PortNumberEvent(ticks, _reader.ReadByte());
                 // 2f
-                case EndPointEvent.EventNumber:
+                case EndPointEvent.MetaNumber:
                     return new EndPointEvent(ticks);
                 // 51
-                case TempoEvent.EventNumber:
+                case TempoEvent.MetaNumber:
                     return new TempoEvent(ticks, _reader.ReadBEUInt((byte) length));
                 // 54
-                case SmpteOffsetEvent.EventNumber:
+                case SmpteOffsetEvent.MetaNumber:
                     bytes = _reader.ReadBytes(length);
                     return new SmpteOffsetEvent(ticks, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
                 // 58
-                case BeatEvent.EventNumber:
+                case BeatEvent.MetaNumber:
                     bytes = _reader.ReadBytes(length);
                     return new BeatEvent(ticks, bytes[0], bytes[1], bytes[2], bytes[3]);
                 // 59
-                case KeyEvent.EventNumber:
-                    var sf = (sbyte) _reader.ReadByte();
-                    var mi = _reader.ReadByte() == 0;
-
-                    if ((sf, mi) == (-7, true))
-                        return new KeyEvent(ticks, CFlatMajor);
-                    if ((sf, mi) == (-7, false))
-                        return new KeyEvent(ticks, AFlatMinor);
-                    if ((sf, mi) == (-6, true))
-                        return new KeyEvent(ticks, GFlatMajor);
-                    if ((sf, mi) == (-6, false))
-                        return new KeyEvent(ticks, EFlatMinor);
-                    if ((sf, mi) == (-5, true))
-                        return new KeyEvent(ticks, DFlatMajor);
-                    if ((sf, mi) == (-5, false))
-                        return new KeyEvent(ticks, BFlatMinor);
-                    if ((sf, mi) == (-4, true))
-                        return new KeyEvent(ticks, AFlatMajor);
-                    if ((sf, mi) == (-4, false))
-                        return new KeyEvent(ticks, FMinor);
-                    if ((sf, mi) == (-3, true))
-                        return new KeyEvent(ticks, EFlatMajor);
-                    if ((sf, mi) == (-3, false))
-                        return new KeyEvent(ticks, CMinor);
-                    if ((sf, mi) == (-2, true))
-                        return new KeyEvent(ticks, BFlatMajor);
-                    if ((sf, mi) == (-2, false))
-                        return new KeyEvent(ticks, GMinor);
-                    if ((sf, mi) == (-1, true))
-                        return new KeyEvent(ticks, FMajor);
-                    if ((sf, mi) == (-1, false))
-                        return new KeyEvent(ticks, DMinor);
-                    if ((sf, mi) == (0, true))
-                        return new KeyEvent(ticks, CMajor);
-                    if ((sf, mi) == (0, false))
-                        return new KeyEvent(ticks, AMinor);
-                    if ((sf, mi) == (1, true))
-                        return new KeyEvent(ticks, GMajor);
-                    if ((sf, mi) == (1, false))
-                        return new KeyEvent(ticks, EMinor);
-                    if ((sf, mi) == (2, true))
-                        return new KeyEvent(ticks, DMajor);
-                    if ((sf, mi) == (2, false))
-                        return new KeyEvent(ticks, BMinor);
-                    if ((sf, mi) == (3, true))
-                        return new KeyEvent(ticks, AMajor);
-                    if ((sf, mi) == (3, false))
-                        return new KeyEvent(ticks, FSharpMinor);
-                    if ((sf, mi) == (4, true))
-                        return new KeyEvent(ticks, EMajor);
-                    if ((sf, mi) == (4, false))
-                        return new KeyEvent(ticks, CSharpMinor);
-                    if ((sf, mi) == (5, true))
-                        return new KeyEvent(ticks, BMajor);
-                    if ((sf, mi) == (5, false))
-                        return new KeyEvent(ticks, GSharpMinor);
-                    if ((sf, mi) == (6, true))
-                        return new KeyEvent(ticks, FSharpMajor);
-                    if ((sf, mi) == (6, false))
-                        return new KeyEvent(ticks, DSharpMinor);
-                    if ((sf, mi) == (7, true))
-                        return new KeyEvent(ticks, CSharpMajor);
-                    if ((sf, mi) == (7, false))
-                        return new KeyEvent(ticks, ASharpMinor);
-                    return null;
+                case KeyEvent.MetaNumber:
+                    var keyAccidentalSign = (KeyAccidentalSign) (sbyte) _reader.ReadByte();
+                    var tonality = (Tonality) _reader.ReadByte();
+                    return new KeyEvent(ticks, (keyAccidentalSign, tonality).ToKey());
                 // 7f
-                case SequencerUniqueEvent.EventNumber:
+                case SequencerUniqueEvent.MetaNumber:
                     return new SequencerUniqueEvent(ticks, _reader.ReadBytes(length));
                 // Unknown
                 default:
-                    return new UnknownMetaEvent(ticks, eventNumber, _reader.ReadBytes(length));
+                    return new UnknownMetaEvent(ticks, metaNumber, _reader.ReadBytes(length));
             }
         }
 

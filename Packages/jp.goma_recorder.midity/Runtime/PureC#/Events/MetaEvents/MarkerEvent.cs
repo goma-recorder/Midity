@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class MarkerEvent : MTrkEvent
+    public sealed class MarkerEvent : MetaEvent
     {
-        public const byte EventNumber = 0x06;
+        public const byte MetaNumber = 0x06;
+        public override byte MetaId => MetaNumber;
         public string text;
 
         internal MarkerEvent(uint ticks, string text) : base(ticks)

@@ -4,14 +4,15 @@ using System.Linq;
 
 namespace Midity
 {
-    public sealed class UnknownMetaEvent : MTrkEvent
+    public sealed class UnknownMetaEvent : MetaEvent
     {
         public readonly byte[] data;
-        public readonly byte eventNumber;
+        public readonly byte metaId;
+        public override byte MetaId => metaId;
 
-        internal UnknownMetaEvent(uint ticks, byte eventNumber, byte[] data) : base(ticks)
+        internal UnknownMetaEvent(uint ticks, byte metaId, byte[] data) : base(ticks)
         {
-            this.eventNumber = eventNumber;
+            this.metaId = metaId;
             this.data = data;
         }
 

@@ -36,7 +36,7 @@ namespace Midity
                 throw new FormatException("Length of header chunk must be 6.");
 
             // Format
-            var format = (byte) _reader.ReadBEUShort();
+            var format = (Format) _reader.ReadBEUShort();
 
             // Number of tracks
             var trackCount = _reader.ReadBEUInt(2);
@@ -219,13 +219,10 @@ namespace Midity
                     return new PolyphonicKeyPressureEvent(ticks, channel, _reader.ReadByte(), _reader.ReadByte());
                 // b0
                 case ControlChangeEvent.StatusHead:
-                    var controlChangeNumber = _reader.ReadByte();
-                    var bytes = (status & 0xe0u) == 0xc0u ? (byte) 0 : _reader.ReadByte();
-                    return new ControlChangeEvent(ticks, channel, controlChangeNumber, bytes);
+                    return new ControlChangeEvent(ticks, channel, (Controller) _reader.ReadByte(), _reader.ReadByte());
                 // c0
                 case ProgramChangeEvent.StatusHead:
-                    var programNumber = _reader.ReadBEUShort();
-                    return new ProgramChangeEvent(ticks, channel, programNumber);
+                    return new ProgramChangeEvent(ticks, channel, (GeneralMidiInstrument) _reader.ReadByte());
                 // d0
                 case ChannelPressureEvent.StatusHead:
                     return new ChannelPressureEvent(ticks, channel, _reader.ReadByte());

@@ -52,5 +52,11 @@ namespace Midity
             ThrowException(name, input, min, max);
             target = input;
         }
+
+        protected static void SetIfInRange(string name, out short target, short input, short min, short max)
+        {
+            ThrowException(name, input, min, max);
+            target = input;
+        }
     }
 }

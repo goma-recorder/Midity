@@ -19,7 +19,7 @@ namespace Midity
         }
 
         internal NoteEvent(uint ticks, bool isNoteOn, byte channel, NoteName noteName, NoteOctave noteOctave,
-            byte velocity) : this(ticks, isNoteOn, channel, NoteEnumUtil.ToNoteNumber(noteName, noteOctave), velocity)
+            byte velocity) : this(ticks, isNoteOn, channel, (noteName, noteOctave).ToNoteNumber(), velocity)
         {
         }
 
@@ -35,13 +35,13 @@ namespace Midity
         public NoteName NoteName
         {
             get => NoteEnumUtil.ToNoteName(NoteNumber);
-            internal set => NoteNumber = NoteEnumUtil.ToNoteNumber(value, NoteOctave);
+            internal set => NoteNumber = (value, NoteOctave).ToNoteNumber();
         }
 
         public NoteOctave NoteOctave
         {
             get => NoteEnumUtil.ToNoteOctave(NoteNumber);
-            internal set => NoteNumber = NoteEnumUtil.ToNoteNumber(NoteName, value);
+            internal set => NoteNumber = (NoteName, value).ToNoteNumber();
         }
 
         public byte Velocity

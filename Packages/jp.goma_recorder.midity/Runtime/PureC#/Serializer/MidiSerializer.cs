@@ -26,7 +26,7 @@ namespace Midity
             stream.Write(stringBytes);
             // Chunk length
             WriteBEUint(6, 4);
-            WriteBEUint(midiFile.format, 2);
+            WriteBEUint((uint) midiFile.format, 2);
             WriteBEUint((uint) midiFile.Tracks.Count, 2);
             WriteBEUint(midiFile.DeltaTime, 2);
 
@@ -77,14 +77,14 @@ namespace Midity
                 case ControlChangeEvent controlChangeEvent:
                     WriteEvent(
                         controlChangeEvent.Status,
-                        controlChangeEvent.controlChangeNumber,
+                        (byte) controlChangeEvent.controller,
                         controlChangeEvent.data);
                     break;
                 case ProgramChangeEvent programChangeEvent:
                     WriteEvent(
                         programChangeEvent.Status,
-                        (byte) ((programChangeEvent.programNumber >> 8) & 0xff),
-                        (byte) (programChangeEvent.programNumber & 0xff));
+                        (byte) programChangeEvent.instrument,
+                        0);
                     break;
                 case ChannelPressureEvent channelPressureEvent:
                     WriteEvent(
@@ -94,8 +94,8 @@ namespace Midity
                 case PitchBendEvent pitchBendEvent:
                     WriteEvent(
                         pitchBendEvent.Status,
-                        pitchBendEvent.byte1,
-                        pitchBendEvent.byte2);
+                        pitchBendEvent.UpperBits,
+                        pitchBendEvent.LowerBits);
                     break;
                 case SequenceNumberEvent sequenceNumberEvent:
                     WriteBytesDataMetaEvent(

@@ -6,14 +6,14 @@ namespace Midity
     public sealed class ProgramChangeEvent : MidiEvent
     {
         public const byte StatusHead = 0xc0;
-        public ushort programNumber;
+        public GeneralMidiInstrument instrument;
 
-        internal ProgramChangeEvent(uint ticks, byte channel, ushort programNumber) : base(ticks, channel)
+        internal ProgramChangeEvent(uint ticks, byte channel, GeneralMidiInstrument instrument) : base(ticks, channel)
         {
-            this.programNumber = programNumber;
+            this.instrument = instrument;
         }
 
-        public ProgramChangeEvent(byte channel, ushort programNumber) : this(0, channel, programNumber)
+        public ProgramChangeEvent(byte channel, GeneralMidiInstrument instrument) : this(0, channel, instrument)
         {
         }
 
@@ -21,6 +21,7 @@ namespace Midity
 
         protected override Type ToString(List<string> list)
         {
+            list.Add(instrument.ToString());
             return typeof(ProgramChangeEvent);
         }
     }

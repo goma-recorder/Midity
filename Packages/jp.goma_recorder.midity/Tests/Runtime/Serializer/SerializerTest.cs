@@ -135,12 +135,12 @@ namespace Midity.Tests
                 var ticks = 300u;
                 byte channel = 3;
 
-                var x = new ControlChangeEvent(ticks, channel, GetRandomByte(), GetRandomByte());
+                var x = new ControlChangeEvent(ticks, channel, (Controller) GetRandomByte(), GetRandomByte());
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
                 Assert.That(x.Status == y.Status);
-                Assert.That(x.controlChangeNumber == y.controlChangeNumber);
+                Assert.That(x.controller == y.controller);
                 Assert.That(x.data == y.data);
             }
 
@@ -150,12 +150,12 @@ namespace Midity.Tests
                 var ticks = 6253u;
                 byte channel = 7;
 
-                var x = new ProgramChangeEvent(ticks, channel, GetRandomByte());
+                var x = new ProgramChangeEvent(ticks, channel, (GeneralMidiInstrument) GetRandomByte());
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
                 Assert.That(x.Channel == y.Channel);
-                Assert.That(x.programNumber == y.programNumber);
+                Assert.That(x.instrument == y.instrument);
             }
 
             [Test]
@@ -174,11 +174,12 @@ namespace Midity.Tests
             {
                 var value = GetRandomValue();
 
-                var x = new PitchBendEvent(value.ticks, value.channel, GetRandomByte(), GetRandomByte());
+                var x = new PitchBendEvent(5, PitchWheelStep.WholeStepDown);
                 var y = ReDeserialize(x);
 
-                Assert.That(x.byte1 == y.byte1);
-                Assert.That(x.byte2 == y.byte2);
+                Assert.That(x.UpperBits == y.UpperBits);
+                Assert.That(x.LowerBits == y.LowerBits);
+                Assert.That(x.Position == y.Position);
             }
 
             [Test]

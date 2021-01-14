@@ -6,7 +6,7 @@ namespace Midity
     // ScriptableObject class used for storing a MIDI file asset
     public sealed class MidiFileAsset : ScriptableObject
     {
-        [SerializeField] private byte format;
+        [SerializeField] private Format format;
         [SerializeField] private uint deltaTime;
         [SerializeField] private int codePage;
         [SerializeField] private int trackCount;

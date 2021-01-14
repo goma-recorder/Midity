@@ -36,7 +36,7 @@ namespace Midity.Playable.Editor
                             note.Add((noteEvent.NoteNumber, noteEvent.NoteOctave, noteEvent.NoteName));
                         break;
                     case ControlChangeEvent controlChangeEvent:
-                        cc.Add(controlChangeEvent.controlChangeNumber);
+                        cc.Add((int) controlChangeEvent.controller);
                         break;
                 }
             }

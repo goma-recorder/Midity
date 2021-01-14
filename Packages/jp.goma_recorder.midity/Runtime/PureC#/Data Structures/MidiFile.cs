@@ -5,23 +5,23 @@ namespace Midity
 {
     public class MidiFile
     {
-        public readonly byte format;
+        public readonly Format format;
         private readonly List<MidiTrack> _tracks = new List<MidiTrack>();
         public readonly Encoding encoding;
 
-        public MidiFile(uint deltaTime, Encoding encoding, byte format = 0)
+        public MidiFile(uint deltaTime, Encoding encoding, Format format = Format.Zero)
         {
             DeltaTime = deltaTime;
             this.encoding = encoding;
             this.format = format;
         }
 
-        public MidiFile(uint deltaTime, int codePage, byte format = 0)
+        public MidiFile(uint deltaTime, int codePage, Format format = Format.Zero)
             : this(deltaTime, Encoding.GetEncoding(codePage), format)
         {
         }
 
-        public MidiFile(uint deltaTime, string codeName, byte format = 0)
+        public MidiFile(uint deltaTime = 96, string codeName = "utf-8", Format format = Format.Zero)
             : this(deltaTime, Encoding.GetEncoding(codeName), format)
         {
         }

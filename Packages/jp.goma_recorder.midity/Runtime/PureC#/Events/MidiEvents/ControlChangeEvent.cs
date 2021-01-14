@@ -6,18 +6,18 @@ namespace Midity
     public sealed class ControlChangeEvent : MidiEvent
     {
         public const byte StatusHead = 0xb0;
-        public byte controlChangeNumber;
+        public Controller controller;
         public byte data;
 
-        internal ControlChangeEvent(uint ticks, byte channel, byte controlChangeNumber, byte data) : base(ticks,
+        internal ControlChangeEvent(uint ticks, byte channel, Controller controller, byte data) : base(ticks,
             channel)
         {
-            this.controlChangeNumber = controlChangeNumber;
+            this.controller = controller;
             this.data = data;
         }
 
-        public ControlChangeEvent(byte channel, byte controlChangeNumber, byte data) : this(0, channel,
-            controlChangeNumber, data)
+        public ControlChangeEvent(byte channel, Controller controller, byte data) : this(0, channel,
+            controller, data)
         {
         }
 
@@ -25,7 +25,7 @@ namespace Midity
 
         protected override Type ToString(List<string> list)
         {
-            list.Add(controlChangeNumber.ToString());
+            list.Add(controller.ToString());
             list.Add(data.ToString());
             return typeof(ControlChangeEvent);
         }

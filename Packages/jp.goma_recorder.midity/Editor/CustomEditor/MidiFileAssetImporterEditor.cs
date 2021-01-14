@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 
@@ -6,6 +7,7 @@ namespace Midity.Playable.Editor
     [CustomEditor(typeof(MidiFileAssetImporter))]
     internal sealed class MidiFileAssetImporterEditor : ScriptedImporterEditor
     {
+        private string _lastCodeName;
         private SerializedProperty _codeName;
 
         public override bool showImportedObject => false;
@@ -14,6 +16,7 @@ namespace Midity.Playable.Editor
         {
             base.OnEnable();
             _codeName = serializedObject.FindProperty("_characterCodeName");
+            _lastCodeName = _codeName.stringValue;
         }
 
         public override void OnInspectorGUI()
@@ -24,6 +27,16 @@ namespace Midity.Playable.Editor
 
             serializedObject.Update();
             EditorGUILayout.PropertyField(_codeName);
+            try
+            {
+                Encoding.GetEncoding(_codeName.stringValue);
+                _lastCodeName = _codeName.stringValue;
+            }
+            catch
+            {
+                _codeName.stringValue = _lastCodeName;
+            }
+
             serializedObject.ApplyModifiedProperties();
 
             ApplyRevertGUI();

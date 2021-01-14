@@ -5,37 +5,6 @@ using static Midity.Tonality;
 
 namespace Midity
 {
-    public enum NoteName : byte
-    {
-        C,
-        CSharp,
-        D,
-        DSharp,
-        E,
-        F,
-        FSharp,
-        G,
-        GSharp,
-        A,
-        ASharp,
-        B
-    }
-
-    public enum NoteOctave : byte
-    {
-        Minus2,
-        Minus1,
-        Zero,
-        Plus1,
-        Plus2,
-        Plus3,
-        Plus4,
-        Plus5,
-        Plus6,
-        Plus7,
-        Plus8
-    }
-
     public enum NoteKey : byte
     {
         CFlatMajor,
@@ -127,24 +96,6 @@ namespace Midity
 
         /// <summary>Key is minor.</summary>
         Minor = 1
-    }
-
-    public static class NoteEnumUtil
-    {
-        public static NoteName ToNoteName(byte noteNumber)
-        {
-            return (NoteName) (noteNumber % 12);
-        }
-
-        public static NoteOctave ToNoteOctave(byte noteNumber)
-        {
-            return (NoteOctave) (noteNumber / 12);
-        }
-
-        public static byte ToNoteNumber(NoteName noteName, NoteOctave noteOctave)
-        {
-            return (byte) ((int) noteName + (int) noteOctave * 12);
-        }
     }
 
     public static class NoteKeyExtension

@@ -1,0 +1,21 @@
+{
+  "name": "jp.goma_recorder.midity",
+  "displayName": "Midity",
+  "author": "Tabi Morinaga",
+  "version": "1.0.0",
+  "unity": "2020.1",
+  "description": "Midity is a custom unity package for reading and writing Standard MIDI Files (SMF).",
+  "keywords": [
+    "unity",
+    "midi"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goma-recorder/Midity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/goma-recorder/Midity/issues"
+  },
+  "homepage": "https://github.com/goma-recorder/Midity#readme"
+}

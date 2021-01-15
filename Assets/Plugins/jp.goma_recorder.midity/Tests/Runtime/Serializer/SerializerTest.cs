@@ -15,7 +15,7 @@ namespace Midity.Tests
             public void SerializeMidiFile()
             {
                 var path = Directory.GetCurrentDirectory() +
-                           "/Packages/jp.goma_recorder.midity/Tests/Runtime/Sample.mid";
+                           "/Assets/Plugins/jp.goma_recorder.midity/Tests/Runtime/Sample.mid";
                 using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
                     var memoryStream = new MemoryStream();

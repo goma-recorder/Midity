@@ -62,46 +62,32 @@ namespace Midity
         {
             switch (mTrkEvent)
             {
-                case NoteEvent noteEvent:
-                    WriteEvent(
-                        noteEvent.Status,
-                        noteEvent.NoteNumber,
-                        noteEvent.Velocity);
+                case OnNoteEvent onNoteEvent:
+                    WriteEvent(onNoteEvent.NoteNumber, onNoteEvent.Velocity);
+                    break;
+                case OffNoteEvent offNoteEvent:
+                    WriteEvent(offNoteEvent.NoteNumber, 0);
                     break;
                 case PolyphonicKeyPressureEvent polyphonicKeyPressureEvent:
-                    WriteEvent(
-                        polyphonicKeyPressureEvent.Status,
-                        polyphonicKeyPressureEvent.noteNumber,
-                        polyphonicKeyPressureEvent.pressure);
+                    WriteEvent(polyphonicKeyPressureEvent.noteNumber, polyphonicKeyPressureEvent.pressure);
                     break;
                 case ControlChangeEvent controlChangeEvent:
-                    WriteEvent(
-                        controlChangeEvent.Status,
-                        (byte) controlChangeEvent.controller,
-                        controlChangeEvent.data);
+                    WriteEvent((byte) controlChangeEvent.controller, controlChangeEvent.data);
                     break;
                 case ProgramChangeEvent programChangeEvent:
-                    WriteEvent(
-                        programChangeEvent.Status,
-                        (byte) programChangeEvent.instrument,
-                        0);
+                    WriteEvent((byte) programChangeEvent.instrument);
                     break;
                 case ChannelPressureEvent channelPressureEvent:
-                    WriteEvent(
-                        channelPressureEvent.Status,
-                        channelPressureEvent.pressure);
+                    WriteEvent(channelPressureEvent.pressure);
                     break;
                 case PitchBendEvent pitchBendEvent:
-                    WriteEvent(
-                        pitchBendEvent.Status,
-                        pitchBendEvent.UpperBits,
-                        pitchBendEvent.LowerBits);
+                    WriteEvent(pitchBendEvent.UpperBits, pitchBendEvent.LowerBits);
                     break;
                 case SequenceNumberEvent sequenceNumberEvent:
                     WriteBytesDataMetaEvent(
                         sequenceNumberEvent,
                         (byte) (sequenceNumberEvent.number >> 8),
-                        (byte) (sequenceNumberEvent.number & 0x00ff));
+                        (byte) (sequenceNumberEvent.number & 0xff));
                     break;
                 case TextEvent textEvent:
                     WriteTextMetaEvent(textEvent, textEvent.text);
@@ -131,18 +117,13 @@ namespace Midity
                     WriteTextMetaEvent(deviceNameEvent, deviceNameEvent.name);
                     break;
                 case ChannelPrefixEvent channelPrefixEvent:
-                    WriteBytesDataMetaEvent(
-                        channelPrefixEvent,
-                        channelPrefixEvent.data);
+                    WriteBytesDataMetaEvent(channelPrefixEvent, channelPrefixEvent.data);
                     break;
                 case PortNumberEvent portNumberEvent:
-                    WriteBytesDataMetaEvent(
-                        portNumberEvent,
-                        portNumberEvent.Number);
+                    WriteBytesDataMetaEvent(portNumberEvent, portNumberEvent.Number);
                     break;
                 case EndPointEvent endPointEvent:
-                    WriteBytesDataMetaEvent(
-                        endPointEvent);
+                    WriteBytesDataMetaEvent(endPointEvent);
                     break;
                 case TempoEvent tempoEvent:
                     WriteBytesDataMetaEvent(
@@ -185,15 +166,15 @@ namespace Midity
                     Buffer.BlockCopy(sysExEvent.data, 0, sysExData, 0, sysExEvent.data.Length);
                     sysExData[sysExData.Length - 1] = 0xf7;
                     var dataLengthBytes = ToMultiBytes((uint) sysExData.Length);
-                    WriteEvent(0xf0, Concat(dataLengthBytes, sysExData));
+                    WriteEvent(Concat(dataLengthBytes, sysExData));
                     break;
             }
 
-            void WriteEvent(byte status, params byte[] data)
+            void WriteEvent(params byte[] data)
             {
                 var tickBytes = ToMultiBytes(mTrkEvent.Ticks);
                 stream.Write(tickBytes);
-                stream.WriteByte(status);
+                stream.WriteByte(mTrkEvent.Status);
                 stream.Write(data);
             }
 
@@ -201,7 +182,7 @@ namespace Midity
             {
                 data = new byte[data.Length + 1];
                 data[0] = metaEvent.MetaId;
-                WriteEvent(0xff, data);
+                WriteEvent(data);
             }
 
             void WriteTextMetaEvent(MetaEvent metaEvent, string text)

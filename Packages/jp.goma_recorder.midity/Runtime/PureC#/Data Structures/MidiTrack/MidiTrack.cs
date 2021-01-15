@@ -310,21 +310,21 @@ namespace Midity
             return AddNoteEvent(rootEvent, onNoteEvent, length, absoluteTick);
         }
 
-        private NoteEventPair AddNoteEvent(NoteEvent onNoteEvent, uint length, float absoluteTime)
+        private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, float absoluteTime)
         {
             AddEvent(onNoteEvent, absoluteTime);
             var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
             return new NoteEventPair(onNoteEvent, offNoteEvent, length);
         }
 
-        private NoteEventPair AddNoteEvent(NoteEvent onNoteEvent, uint length, uint absoluteTick)
+        private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, uint absoluteTick)
         {
             AddEvent(onNoteEvent, absoluteTick);
             var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
             return new NoteEventPair(onNoteEvent, offNoteEvent, length);
         }
 
-        private NoteEventPair AddNoteEvent(MTrkEvent rootEvent, NoteEvent onNoteEvent, uint length,
+        private NoteEventPair AddNoteEvent(MTrkEvent rootEvent, OnNoteEvent onNoteEvent, uint length,
             int ticks = 0)
         {
             AddEvent(rootEvent, onNoteEvent, ticks);
@@ -332,9 +332,9 @@ namespace Midity
             return new NoteEventPair(onNoteEvent, offNoteEvent, length);
         }
 
-        private NoteEvent AddOffNoteEvent(NoteEvent onNoteEvent, uint length)
+        private OffNoteEvent AddOffNoteEvent(NoteEvent onNoteEvent, uint length)
         {
-            var offNoteEvent = new NoteEvent(0, false, onNoteEvent.Channel, onNoteEvent.NoteNumber, 0);
+            var offNoteEvent = new OffNoteEvent(0, onNoteEvent.Channel, onNoteEvent.NoteNumber);
             AddEvent(onNoteEvent, offNoteEvent, (int) length);
             return offNoteEvent;
         }

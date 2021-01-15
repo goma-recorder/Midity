@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class PortNumberEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x21;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x21;
+        public override byte MetaId => META_ID;
         private byte _number;
 
         internal PortNumberEvent(uint ticks, byte number) : base(ticks)

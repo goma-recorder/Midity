@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class QueueEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x07;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x07;
+        public override byte MetaId => META_ID;
         public string text;
 
         internal QueueEvent(uint ticks, string text) : base(ticks)

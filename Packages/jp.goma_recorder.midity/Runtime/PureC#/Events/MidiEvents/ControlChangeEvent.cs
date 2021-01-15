@@ -5,7 +5,7 @@ namespace Midity
 {
     public sealed class ControlChangeEvent : MidiEvent
     {
-        public const byte StatusHead = 0xb0;
+        public const byte STATUS_HEAD = 0xb0;
         public Controller controller;
         public byte data;
 
@@ -21,7 +21,7 @@ namespace Midity
         {
         }
 
-        public byte Status => (byte) (StatusHead | Channel);
+        protected override byte StatusHead => STATUS_HEAD;
 
         protected override Type ToString(List<string> list)
         {

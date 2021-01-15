@@ -3,27 +3,20 @@ using System.Collections.Generic;
 
 namespace Midity
 {
-    public sealed class NoteEvent : MidiEvent
+    public abstract class NoteEvent : MidiEvent
     {
-        public readonly bool isNoteOn;
-
         private byte _noteNumber;
-        private byte _velocity;
 
-        internal NoteEvent(uint ticks, bool isNoteOn, byte channel, byte noteNumber, byte velocity) : base(ticks,
+        internal NoteEvent(uint ticks, byte channel, byte noteNumber) : base(ticks,
             channel)
         {
-            this.isNoteOn = isNoteOn;
             NoteNumber = noteNumber;
-            Velocity = velocity;
         }
 
-        internal NoteEvent(uint ticks, bool isNoteOn, byte channel, NoteName noteName, NoteOctave noteOctave,
-            byte velocity) : this(ticks, isNoteOn, channel, (noteName, noteOctave).ToNoteNumber(), velocity)
+        internal NoteEvent(uint ticks, byte channel, NoteName noteName, NoteOctave noteOctave) : this(ticks, channel,
+            (noteName, noteOctave).ToNoteNumber())
         {
         }
-
-        public byte Status => (byte) ((isNoteOn ? 0x90 : 0x80) | Channel);
 
         public byte NoteNumber
         {
@@ -44,22 +37,9 @@ namespace Midity
             internal set => NoteNumber = (NoteName, value).ToNoteNumber();
         }
 
-        public byte Velocity
-        {
-            get => _velocity;
-            internal set
-            {
-                if (isNoteOn)
-                    _velocity = value;
-            }
-        }
-
-
         protected override Type ToString(List<string> list)
         {
-            list.Add(isNoteOn.ToString());
             list.Add(NoteNumber.ToString());
-            list.Add(Velocity.ToString());
             return typeof(NoteEvent);
         }
     }

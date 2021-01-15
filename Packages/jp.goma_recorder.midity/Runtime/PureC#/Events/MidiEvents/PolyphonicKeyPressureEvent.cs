@@ -5,7 +5,7 @@ namespace Midity
 {
     public sealed class PolyphonicKeyPressureEvent : MidiEvent
     {
-        public const byte StatusHead = 0xa0;
+        public const byte STATUS_HEAD = 0xa0;
         public byte noteNumber;
         public byte pressure;
 
@@ -21,7 +21,7 @@ namespace Midity
         {
         }
 
-        public byte Status => (byte) (StatusHead | Channel);
+        protected override byte StatusHead => STATUS_HEAD;
 
         protected override Type ToString(List<string> list)
         {

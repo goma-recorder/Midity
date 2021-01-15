@@ -1,12 +1,12 @@
 ﻿namespace Midity
 {
-    public class NoteEventPair
+    public sealed class NoteEventPair
     {
         public uint LengthTick { get; internal set; }
-        public readonly NoteEvent onNoteEvent;
-        public readonly NoteEvent offNoteEvent;
+        public readonly OnNoteEvent onNoteEvent;
+        public readonly OffNoteEvent offNoteEvent;
 
-        internal NoteEventPair(NoteEvent onNoteEvent, NoteEvent offNoteEvent, uint lengthTick)
+        internal NoteEventPair(OnNoteEvent onNoteEvent, OffNoteEvent offNoteEvent, uint lengthTick)
         {
             this.onNoteEvent = onNoteEvent;
             this.offNoteEvent = offNoteEvent;

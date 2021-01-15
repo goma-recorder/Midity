@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class SmpteOffsetEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x54;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x54;
+        public override byte MetaId => META_ID;
         public byte ff;
         public byte fr;
         public byte hr;

@@ -11,6 +11,7 @@ namespace Midity
             Ticks = ticks;
         }
 
+        public abstract byte Status { get; }
         public uint Ticks { get; internal set; }
 
         protected abstract Type ToString(List<string> list);

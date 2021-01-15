@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class KeyEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x59;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x59;
+        public override byte MetaId => META_ID;
         public NoteKey noteKey;
 
         internal KeyEvent(uint ticks, NoteKey noteKey) : base(ticks)

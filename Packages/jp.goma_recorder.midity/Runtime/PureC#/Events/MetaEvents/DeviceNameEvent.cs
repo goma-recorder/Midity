@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class DeviceNameEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x09;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x09;
+        public override byte MetaId => META_ID;
         public string name;
 
         internal DeviceNameEvent(uint ticks, string name) : base(ticks)

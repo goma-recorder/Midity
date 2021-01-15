@@ -72,7 +72,6 @@ namespace Midity.Tests
                 {
                     MidiSerializer.SerializeEvent(mTrkEvent, encoding, stream);
                     stream.Seek(0, SeekOrigin.Begin);
-                    // stream.Read(bytes, 0, (int) stream.Length);
                     var deserializer = new MidiDeserializer(stream, encoding);
                     byte status = 0;
                     return (T) deserializer.ReadEvent(ref status);
@@ -92,24 +91,39 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void NoteEvent()
+            public void OnNoteEvent()
             {
                 var ticks = 300u;
-                var isNoteOn = true;
                 var channel = (byte) 2;
                 var noteName = NoteName.A;
                 var noteOctave = NoteOctave.Zero;
                 var velocity = (byte) 5;
 
-                var x = new NoteEvent(ticks, isNoteOn, channel, noteName, noteOctave, velocity);
+                var x = new OnNoteEvent(ticks, channel, noteName, noteOctave, velocity);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
-                Assert.That(x.isNoteOn == y.isNoteOn);
                 Assert.That(x.Channel == y.Channel);
                 Assert.That(x.NoteName == y.NoteName);
                 Assert.That(x.NoteOctave == y.NoteOctave);
                 Assert.That(x.Velocity == y.Velocity);
+            }
+
+            [Test]
+            public void OffNoteEvent()
+            {
+                var ticks = 300u;
+                var channel = (byte) 2;
+                var noteName = NoteName.A;
+                var noteOctave = NoteOctave.Zero;
+
+                var x = new OffNoteEvent(ticks, channel, noteName, noteOctave);
+                var y = ReDeserialize(x);
+
+                Assert.That(x.Ticks == y.Ticks);
+                Assert.That(x.Channel == y.Channel);
+                Assert.That(x.NoteName == y.NoteName);
+                Assert.That(x.NoteOctave == y.NoteOctave);
             }
 
             [Test]

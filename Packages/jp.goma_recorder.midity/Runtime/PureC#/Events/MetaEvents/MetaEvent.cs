@@ -6,6 +6,7 @@
         {
         }
 
+        public sealed override byte Status => 0xff;
         public abstract byte MetaId { get; }
     }
 }

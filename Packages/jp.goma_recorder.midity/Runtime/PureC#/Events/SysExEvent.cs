@@ -17,6 +17,8 @@ namespace Midity
         {
         }
 
+        public override byte Status => 0xf0;
+
         protected override Type ToString(List<string> list)
         {
             list.AddRange(data.Select(d => d.ToString()));

@@ -5,7 +5,7 @@ namespace Midity
 {
     public sealed class ProgramChangeEvent : MidiEvent
     {
-        public const byte StatusHead = 0xc0;
+        public const byte STATUS_HEAD = 0xc0;
         public GeneralMidiInstrument instrument;
 
         internal ProgramChangeEvent(uint ticks, byte channel, GeneralMidiInstrument instrument) : base(ticks, channel)
@@ -17,7 +17,7 @@ namespace Midity
         {
         }
 
-        public byte Status => (byte) (StatusHead | Channel);
+        protected override byte StatusHead => STATUS_HEAD;
 
         protected override Type ToString(List<string> list)
         {

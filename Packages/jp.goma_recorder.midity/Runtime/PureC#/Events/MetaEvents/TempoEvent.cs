@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class TempoEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x51;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x51;
+        public override byte MetaId => META_ID;
         private uint _tickTempo;
 
         internal TempoEvent(uint ticks, uint tickTempo) : base(ticks)

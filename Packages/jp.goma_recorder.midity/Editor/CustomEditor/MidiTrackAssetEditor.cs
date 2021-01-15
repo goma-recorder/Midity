@@ -31,9 +31,8 @@ namespace Midity.Playable.Editor
                 _eventTexts.Add(e.ToString());
                 switch (e)
                 {
-                    case NoteEvent noteEvent:
-                        if (!noteEvent.isNoteOn)
-                            note.Add((noteEvent.NoteNumber, noteEvent.NoteOctave, noteEvent.NoteName));
+                    case OnNoteEvent onNoteEvent:
+                        note.Add((onNoteEvent.NoteNumber, onNoteEvent.NoteOctave, onNoteEvent.NoteName));
                         break;
                     case ControlChangeEvent controlChangeEvent:
                         cc.Add((int) controlChangeEvent.controller);

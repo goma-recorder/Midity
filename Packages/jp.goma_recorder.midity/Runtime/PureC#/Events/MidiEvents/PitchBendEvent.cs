@@ -5,7 +5,7 @@ namespace Midity
 {
     public sealed class PitchBendEvent : MidiEvent
     {
-        public const byte StatusHead = 0xe0;
+        public const byte STATUS_HEAD = 0xe0;
         private byte _upperBits;
         private byte _lowerBits;
 
@@ -24,7 +24,7 @@ namespace Midity
         {
         }
 
-        public byte Status => (byte) (StatusHead | Channel);
+        protected override byte StatusHead => STATUS_HEAD;
 
         public byte UpperBits
         {

@@ -5,8 +5,8 @@ namespace Midity
 {
     public sealed class TextEvent : MetaEvent
     {
-        public const byte MetaNumber = 0x01;
-        public override byte MetaId => MetaNumber;
+        public const byte META_ID = 0x01;
+        public override byte MetaId => META_ID;
         public string text;
 
         internal TextEvent(uint ticks, string text) : base(ticks)

@@ -105,13 +105,21 @@ namespace Midity
 
             switch (status)
             {
-                case var stat when 0x80 <= stat && stat <= 0xef:
+                case var s when 0x80 <= s && s <= 0xef:
                     var channel = (byte) (status & 0x0f);
                     return ReadMidiEvent(ticks, status, channel);
                 case 0xff:
                     var metaNumber = _reader.ReadByte();
                     var length = _reader.ReadMultiByteValue();
-                    return ReadMetaEvent(ticks, metaNumber, length);
+                    var lastPosition = _reader.Position;
+                    var metaEvent = ReadMetaEvent(ticks, metaNumber, length);
+                    if (length != _reader.Position - lastPosition)
+                    {
+                        var value = _reader.Position - lastPosition - length;
+                        throw new Exception($"Data length does not match. {value} {(value > 0 ? "over" : "under")}");
+                    }
+
+                    return metaEvent;
                 case 0xf0:
                     return ReadSysExEvent(ticks);
                 default:
@@ -119,70 +127,68 @@ namespace Midity
             }
         }
 
-        private MTrkEvent ReadMetaEvent(uint ticks, byte metaNumber, uint length)
+        private MetaEvent ReadMetaEvent(uint ticks, byte metaNumber, uint length)
         {
             byte[] bytes;
             switch (metaNumber)
             {
                 // 00
-                case SequenceNumberEvent.MetaNumber:
-                    bytes = _reader.ReadBytes(length);
-                    var number = (ushort) ((bytes[0] << 8) | bytes[1]);
-                    return new SequenceNumberEvent(ticks, number);
+                case SequenceNumberEvent.META_ID:
+                    return new SequenceNumberEvent(ticks, _reader.ReadBEUShort());
                 // 01
-                case TextEvent.MetaNumber:
+                case TextEvent.META_ID:
                     return new TextEvent(ticks, _reader.ReadChars(length));
                 // 02
-                case CopyrightEvent.MetaNumber:
+                case CopyrightEvent.META_ID:
                     return new CopyrightEvent(ticks, _reader.ReadChars(length));
                 // 03
-                case TrackNameEvent.MetaNumber:
+                case TrackNameEvent.META_ID:
                     return new TrackNameEvent(ticks, _reader.ReadChars(length));
                 // 04
-                case InstrumentNameEvent.MetaNumber:
+                case InstrumentNameEvent.META_ID:
                     return new InstrumentNameEvent(ticks, _reader.ReadChars(length));
                 // 05
-                case LyricEvent.MetaNumber:
+                case LyricEvent.META_ID:
                     return new LyricEvent(ticks, _reader.ReadChars(length));
                 // 06
-                case MarkerEvent.MetaNumber:
+                case MarkerEvent.META_ID:
                     return new MarkerEvent(ticks, _reader.ReadChars(length));
                 // 07
-                case QueueEvent.MetaNumber:
+                case QueueEvent.META_ID:
                     return new QueueEvent(ticks, _reader.ReadChars(length));
                 // 08
-                case ProgramNameEvent.MetaNumber:
+                case ProgramNameEvent.META_ID:
                     return new ProgramNameEvent(ticks, _reader.ReadChars(length));
                 // 09
-                case DeviceNameEvent.MetaNumber:
+                case DeviceNameEvent.META_ID:
                     return new DeviceNameEvent(ticks, _reader.ReadChars(length));
                 // 20
-                case ChannelPrefixEvent.MetaNumber:
+                case ChannelPrefixEvent.META_ID:
                     return new ChannelPrefixEvent(ticks, _reader.ReadByte());
                 // 21
-                case PortNumberEvent.MetaNumber:
+                case PortNumberEvent.META_ID:
                     return new PortNumberEvent(ticks, _reader.ReadByte());
                 // 2f
-                case EndPointEvent.MetaNumber:
+                case EndPointEvent.META_ID:
                     return new EndPointEvent(ticks);
                 // 51
-                case TempoEvent.MetaNumber:
+                case TempoEvent.META_ID:
                     return new TempoEvent(ticks, _reader.ReadBEUInt((byte) length));
                 // 54
-                case SmpteOffsetEvent.MetaNumber:
+                case SmpteOffsetEvent.META_ID:
                     bytes = _reader.ReadBytes(length);
                     return new SmpteOffsetEvent(ticks, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
                 // 58
-                case BeatEvent.MetaNumber:
+                case BeatEvent.META_ID:
                     bytes = _reader.ReadBytes(length);
                     return new BeatEvent(ticks, bytes[0], bytes[1], bytes[2], bytes[3]);
                 // 59
-                case KeyEvent.MetaNumber:
+                case KeyEvent.META_ID:
                     var keyAccidentalSign = (KeyAccidentalSign) (sbyte) _reader.ReadByte();
                     var tonality = (Tonality) _reader.ReadByte();
                     return new KeyEvent(ticks, (keyAccidentalSign, tonality).ToKey());
                 // 7f
-                case SequencerUniqueEvent.MetaNumber:
+                case SequencerUniqueEvent.META_ID:
                     return new SequencerUniqueEvent(ticks, _reader.ReadBytes(length));
                 // Unknown
                 default:
@@ -192,12 +198,7 @@ namespace Midity
 
         private MTrkEvent ReadSysExEvent(uint ticks)
         {
-            var length = _reader.ReadMultiByteValue() - 1;
-            var bytes = new byte[length];
-
-            for (var i = 0; i < length; i++)
-                bytes[i] = _reader.ReadByte();
-
+            var bytes = _reader.ReadBytes(_reader.ReadMultiByteValue() - 1);
             if (_reader.ReadByte() == 0xf7)
                 return new SysExEvent(ticks, bytes);
             throw new Exception();
@@ -207,27 +208,31 @@ namespace Midity
         {
             switch (status & 0xf0)
             {
-                // note event
-                case 0x80:
-                case 0x90:
+                // 80
+                case OffNoteEvent.STATUS_HEAD:
+                // 90
+                case OnNoteEvent.STATUS_HEAD:
                     var noteNumber = _reader.ReadByte();
                     var velocity = (status & 0xe0u) == 0xc0u ? (byte) 0 : _reader.ReadByte();
                     var isNoteOn = (status & 0xf0) == 0x90 && velocity != 0;
-                    return new NoteEvent(ticks, isNoteOn, channel, noteNumber, velocity);
+                    if (isNoteOn)
+                        return new OnNoteEvent(ticks, channel, noteNumber, velocity);
+                    else
+                        return new OffNoteEvent(ticks, channel, noteNumber);
                 // a0
-                case PolyphonicKeyPressureEvent.StatusHead:
+                case PolyphonicKeyPressureEvent.STATUS_HEAD:
                     return new PolyphonicKeyPressureEvent(ticks, channel, _reader.ReadByte(), _reader.ReadByte());
                 // b0
-                case ControlChangeEvent.StatusHead:
+                case ControlChangeEvent.STATUS_HEAD:
                     return new ControlChangeEvent(ticks, channel, (Controller) _reader.ReadByte(), _reader.ReadByte());
                 // c0
-                case ProgramChangeEvent.StatusHead:
+                case ProgramChangeEvent.STATUS_HEAD:
                     return new ProgramChangeEvent(ticks, channel, (GeneralMidiInstrument) _reader.ReadByte());
                 // d0
-                case ChannelPressureEvent.StatusHead:
+                case ChannelPressureEvent.STATUS_HEAD:
                     return new ChannelPressureEvent(ticks, channel, _reader.ReadByte());
                 // e0
-                case PitchBendEvent.StatusHead:
+                case PitchBendEvent.STATUS_HEAD:
                     var byte1 = _reader.ReadByte();
                     var byte2 = _reader.ReadByte();
                     return new PitchBendEvent(ticks, channel, byte1, byte2);

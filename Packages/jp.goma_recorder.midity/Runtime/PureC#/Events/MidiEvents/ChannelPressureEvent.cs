@@ -5,7 +5,7 @@ namespace Midity
 {
     public sealed class ChannelPressureEvent : MidiEvent
     {
-        public const byte StatusHead = 0xd0;
+        public const byte STATUS_HEAD = 0xd0;
         public byte pressure;
 
         internal ChannelPressureEvent(uint ticks, byte channel, byte pressure) : base(ticks, channel)
@@ -17,7 +17,7 @@ namespace Midity
         {
         }
 
-        public byte Status => (byte) (StatusHead | Channel);
+        protected override byte StatusHead => STATUS_HEAD;
 
         protected override Type ToString(List<string> list)
         {

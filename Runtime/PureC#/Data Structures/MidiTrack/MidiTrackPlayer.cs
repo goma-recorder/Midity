@@ -18,7 +18,6 @@ namespace Midity
 
         #endregion
 
-
         #region MIDI signal emission
 
         private int _headIndex;
@@ -37,47 +36,51 @@ namespace Midity
             }
 
             _lastTime = time % track.AllSeconds;
-            var targetTick = track.ConvertSecondToTicks(_lastTime);
-            _lastTick = 0u;
-            _headIndex = 0;
-            while (targetTick - _lastTick > track.Events[_headIndex].Ticks)
-            {
-                _lastTick += track.Events[_headIndex].Ticks;
-                _headIndex++;
-                if (_headIndex == track.Events.Count)
-                    if (canLoop)
-                        _headIndex = 0;
-                    else
-                        return;
-            }
+            ResetHead(track.ConvertSecondToTicks(_lastTime));
         }
 
         private void ResetHead(uint targetTick)
         {
-            _lastTick = 0u;
-            _headIndex = 0;
-            while (targetTick - _lastTick > track.Events[_headIndex].Ticks)
+            if (!canLoop && targetTick > track.AllTicks) return;
+            targetTick %= track.AllTicks;
+            for (var i = 0; i < track.Events.Count; i++)
+                if (targetTick >= track.Events[i].Ticks)
+                {
+                    _lastTick = targetTick;
+                    _headIndex = i;
+                    return;
+                }
+        }
+
+        private void PlayByDeltaTicks(uint deltaTicks)
+        {
+            if (IsFinished) return;
+            _lastTick += deltaTicks;
+            _lastTime = track.ConvertTicksToSecond(deltaTicks);
+
+            while (true)
             {
-                _lastTick += track.Events[_headIndex].Ticks;
+                if (_lastTick < track.Events[_headIndex].Ticks) return;
+
+                onPush?.Invoke(track.Events[_headIndex]);
                 _headIndex++;
                 if (_headIndex == track.Events.Count)
-                    if (canLoop)
-                        _headIndex = 0;
-                    else
-                        return;
+                {
+                    if (!canLoop) return;
+                    _headIndex = 0;
+                    ResetHead(0);
+                    _lastTick %= track.AllTicks;
+                }
             }
         }
 
         public void PlayByDeltaTime(float deltaTime)
         {
-            if (IsFinished || deltaTime < 0) return;
+            if (IsFinished || deltaTime < 0 || !canLoop && _headIndex > track.Events.Count - 1)
+                return;
 
             _lastTime += deltaTime;
             var currentTick = track.ConvertSecondToTicks(_lastTime);
-
-
-            if (!canLoop && _headIndex > track.Events.Count - 1)
-                return;
 
             var deltaTick = currentTick - _lastTick;
             while (track.Events[_headIndex].Ticks <= deltaTick)
@@ -95,6 +98,7 @@ namespace Midity
                     }
                     else
                     {
+                        _lastTime = track.AllSeconds;
                         return;
                     }
             }

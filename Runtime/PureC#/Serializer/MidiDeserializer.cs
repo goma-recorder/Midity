@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using static Midity.NoteKey;
 
 namespace Midity
 {
@@ -83,19 +82,21 @@ namespace Midity
             // MIDI event sequence
             var events = new List<MTrkEvent>();
             byte stat = 0;
+            var ticks = 0u;
             while (_reader.Position < chunkEnd)
             {
-                var mtrkEvent = ReadEvent(ref stat);
+                var mtrkEvent = ReadEvent(ref stat, ticks);
                 events.Add(mtrkEvent);
+                ticks = mtrkEvent.Ticks;
             }
 
             midiFile.AddTrack(trackNumber, events);
         }
 
-        internal MTrkEvent ReadEvent(ref byte status)
+        internal MTrkEvent ReadEvent(ref byte status, uint ticks)
         {
             // Delta time
-            var ticks = _reader.ReadMultiByteValue();
+            ticks += _reader.ReadMultiByteValue();
 
             // Status byte
             if ((_reader.PeekByte() & 0x80u) != 0)

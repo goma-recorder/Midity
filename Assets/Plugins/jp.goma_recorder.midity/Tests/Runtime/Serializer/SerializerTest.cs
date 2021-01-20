@@ -70,11 +70,11 @@ namespace Midity.Tests
                 var encoding = Encoding.GetEncoding(CodeName);
                 using (var stream = new MemoryStream())
                 {
-                    MidiSerializer.SerializeEvent(mTrkEvent, encoding, stream);
+                    MidiSerializer.SerializeEvent(mTrkEvent, encoding, stream, 0);
                     stream.Seek(0, SeekOrigin.Begin);
                     var deserializer = new MidiDeserializer(stream, encoding);
                     byte status = 0;
-                    return (T) deserializer.ReadEvent(ref status);
+                    return (T) deserializer.ReadEvent(ref status, 0);
                 }
             }
 

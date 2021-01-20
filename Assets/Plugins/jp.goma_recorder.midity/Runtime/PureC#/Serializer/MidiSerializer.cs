@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using static Midity.NoteKey;
 
 namespace Midity
 {
@@ -49,7 +48,12 @@ namespace Midity
             var chunkEndDataPosition = stream.Position;
             stream.Seek(4, SeekOrigin.Current);
             // UnityEngine.Debug.Log(stream.Position);
-            foreach (var mTrkEvent in midiTrack.Events) SerializeEvent(mTrkEvent, encoding, stream);
+            var lastTicks = 0u;
+            foreach (var mTrkEvent in midiTrack.Events)
+            {
+                SerializeEvent(mTrkEvent, encoding, stream, lastTicks);
+                lastTicks = mTrkEvent.Ticks;
+            }
 
             var chunkEnd = stream.Position - chunkEndDataPosition - 4;
             stream.Seek(chunkEndDataPosition, SeekOrigin.Begin);
@@ -58,7 +62,7 @@ namespace Midity
             stream.Seek(0, SeekOrigin.End);
         }
 
-        internal static void SerializeEvent(MTrkEvent mTrkEvent, Encoding encoding, Stream stream)
+        internal static void SerializeEvent(MTrkEvent mTrkEvent, Encoding encoding, Stream stream, uint lastTicks)
         {
             switch (mTrkEvent)
             {
@@ -172,7 +176,7 @@ namespace Midity
 
             void WriteEvent(params byte[] data)
             {
-                var tickBytes = ToMultiBytes(mTrkEvent.Ticks);
+                var tickBytes = ToMultiBytes(mTrkEvent.Ticks - lastTicks);
                 stream.Write(tickBytes);
                 stream.WriteByte(mTrkEvent.Status);
                 stream.Write(data);

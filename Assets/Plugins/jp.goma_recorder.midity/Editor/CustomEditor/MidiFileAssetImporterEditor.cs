@@ -22,7 +22,7 @@ namespace Midity.Playable.Editor
         public override void OnInspectorGUI()
         {
             var assetImporter = (MidiFileAssetImporter) target;
-            EditorGUILayout.LabelField("Format", assetImporter._midiFileAsset.MidiFile?.format.ToString());
+            EditorGUILayout.LabelField("Format", ((byte) assetImporter._midiFileAsset.MidiFile?.format).ToString());
             EditorGUILayout.LabelField("Delta Time", assetImporter._midiFileAsset.MidiFile?.DeltaTime.ToString());
 
             serializedObject.Update();

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace Midity.Playable.Editor
 {
@@ -64,6 +65,22 @@ namespace Midity.Playable.Editor
             EditorGUILayout.LabelField("CC", _ccText);
             EditorGUI.indentLevel--;
             foreach (var s in _eventTexts) EditorGUILayout.LabelField(s);
+        }
+
+        private Texture2D _texture2D;
+
+        public override Texture2D RenderStaticPreview(string assetPath, Object[] subAssets, int width, int height)
+        {
+            if (_texture2D is null)
+            {
+                var midiTrack = ((MidiTrackAsset) target).MidiTrack;
+                const int topMargin = 2;
+                const int bottomMargin = 1;
+                _texture2D = midiTrack.WriteNoteBarTexture2D((int) midiTrack.DeltaTime / 8, topMargin,
+                    bottomMargin, true);
+            }
+
+            return _texture2D;
         }
     }
 }

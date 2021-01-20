@@ -7,7 +7,7 @@ namespace Midity
     public class MidiTrack
     {
         private readonly List<MTrkEvent> _events = new List<MTrkEvent>();
-        private readonly SortedList<uint, TempoEvent> _tempoEvents = new SortedList<uint, TempoEvent>();
+        private readonly List<TempoEvent> _tempoEvents = new List<TempoEvent>();
         private readonly List<NoteEventPair> _noteEventPairs = new List<NoteEventPair>();
         private TrackNameEvent _trackNameEvent;
 
@@ -23,27 +23,35 @@ namespace Midity
             DeltaTime = deltaTime;
             _events = events;
 
+            var noteTable = new List<OnNoteEvent>();
             foreach (var x in Events)
-            {
-                AllTicks += x.Ticks;
                 switch (x)
                 {
-                    case NoteEvent noteEvent:
+                    case OnNoteEvent onNoteEvent:
+                        noteTable.Add(onNoteEvent);
+                        break;
+                    case OffNoteEvent offNoteEvent:
+                        var on = noteTable.FirstOrDefault(xx => xx.NoteNumber == offNoteEvent.NoteNumber);
+                        if (!(@on is null))
+                        {
+                            noteTable.Remove(@on);
+                            _noteEventPairs.Add(new NoteEventPair(@on, offNoteEvent));
+                        }
+
                         break;
                     case TrackNameEvent trackNameEvent:
                         _trackNameEvent = trackNameEvent;
                         break;
                     case TempoEvent tempoEvent:
-                        _tempoEvents.Add(AllTicks, tempoEvent);
+                        _tempoEvents.Add(tempoEvent);
                         break;
                 }
-            }
 
             AllSeconds = ConvertTicksToSecond(AllTicks);
         }
 
         public uint DeltaTime { get; }
-        public uint AllTicks { get; private set; }
+        public uint AllTicks => Events.Last().Ticks;
         public float AllSeconds { get; private set; }
 
         public IReadOnlyList<MTrkEvent> Events => _events;
@@ -68,22 +76,20 @@ namespace Midity
 
         public uint ConvertSecondToTicks(float time)
         {
-            var tempo = 120f;
             var ticks = 0u;
+            var tempo = 120f;
+            ticks += (uint) Math.Floor(time / AllSeconds) * AllTicks;
+            time %= AllSeconds;
             var offsetTicks = 0u;
-            foreach (var pair in _tempoEvents)
+            foreach (var tempoEvent in _tempoEvents)
             {
-                var length = (pair.Key - offsetTicks) * 60 / (tempo * DeltaTime);
+                var length = (tempoEvent.Ticks - offsetTicks) * 60 / (tempo * DeltaTime);
                 if (time > length)
                 {
-                    ticks += pair.Key - offsetTicks;
+                    ticks += tempoEvent.Ticks - offsetTicks;
                     time -= length;
-                    tempo = pair.Value.Tempo;
-                    offsetTicks = pair.Key;
-                }
-                else
-                {
-                    break;
+                    tempo = tempoEvent.Tempo;
+                    offsetTicks = tempoEvent.Ticks;
                 }
             }
 
@@ -91,20 +97,26 @@ namespace Midity
             return ticks;
         }
 
+        public uint ConvertSecondToTicks(float time, float offsetTime)
+        {
+            time += offsetTime;
+            return ConvertSecondToTicks(time) - ConvertSecondToTicks(offsetTime);
+        }
+
         public float ConvertTicksToSecond(uint tick)
         {
             var tempo = 120f;
             var time = 0f;
             var offsetTicks = 0u;
-            foreach (var pair in _tempoEvents)
+            foreach (var tempoEvent in _tempoEvents)
             {
-                var length = pair.Key - offsetTicks;
+                var length = tempoEvent.Ticks - offsetTicks;
                 if (tick > length)
                 {
                     time += length * 60 / (tempo * DeltaTime);
                     tick -= length;
-                    tempo = pair.Value.Tempo;
-                    offsetTicks = pair.Key;
+                    tempo = tempoEvent.Tempo;
+                    offsetTicks = tempoEvent.Ticks;
                 }
                 else
                 {
@@ -114,32 +126,6 @@ namespace Midity
 
             time += tick * 60 / (tempo * DeltaTime);
             return time;
-        }
-
-        public bool GetAbsoluteTick(MTrkEvent mTrkEvent, out uint absoluteTick)
-        {
-            absoluteTick = 0u;
-            foreach (var e in Events)
-            {
-                absoluteTick += e.Ticks;
-                if (e == mTrkEvent)
-                    return true;
-            }
-
-            absoluteTick = 0u;
-            return false;
-        }
-
-        public bool GetAbsoluteTime(MTrkEvent mTrkEvent, out float time)
-        {
-            if (GetAbsoluteTick(mTrkEvent, out var tick))
-            {
-                time = ConvertTicksToSecond(tick);
-                return true;
-            }
-
-            time = 0f;
-            return false;
         }
 
         private void Validation<T>(T mTrkEvent) where T : MTrkEvent
@@ -158,8 +144,7 @@ namespace Midity
         private void RegistTempoEvent(MTrkEvent mTrkEvent)
         {
             if (!(mTrkEvent is TempoEvent tempoEvent)) return;
-            GetAbsoluteTick(tempoEvent, out var abstractTick);
-            _tempoEvents.Add(abstractTick, tempoEvent);
+            _tempoEvents.Add(tempoEvent);
             AllSeconds = ConvertTicksToSecond(AllTicks);
         }
 
@@ -185,7 +170,6 @@ namespace Midity
 
             _events.Insert(index, mTrkEvent);
             Events[index + 1].Ticks += offsetTicks;
-            AllTicks += offsetTicks;
             RegistTempoEvent(mTrkEvent);
         }
 
@@ -197,146 +181,77 @@ namespace Midity
             if (!(endPointEvent is EndPointEvent)) throw new Exception();
             _events.RemoveAt(Events.Count - 2);
             _events.Add(endPointEvent);
-            AllTicks += mTrkEvent.Ticks;
             RegistTempoEvent(mTrkEvent);
         }
 
-        private void AddEvent(MTrkEvent mTrkEvent, int ticks, int index)
-        {
-            if (ticks >= 0)
-            {
-                for (var i = index + 1; i < Events.Count; i++)
-                {
-                    if (ticks <= Events[i].Ticks)
-                    {
-                        mTrkEvent.Ticks = (uint) ticks;
-                        Events[i].Ticks -= (uint) ticks;
-                        _events.Insert(i + 1, mTrkEvent);
-                        RegistTempoEvent(mTrkEvent);
-                        return;
-                    }
-
-                    ticks -= (int) Events[i].Ticks;
-                }
-
-                mTrkEvent.Ticks = (uint) ticks;
-                _events.Add(mTrkEvent);
-                SortEnd(mTrkEvent);
-            }
-            else
-            {
-                for (var i = index; i >= 0; i--)
-                {
-                    if (ticks >= 0)
-                    {
-                        mTrkEvent.Ticks = (uint) ticks;
-                        Events[i + 1].Ticks -= (uint) ticks;
-                        _events.Insert(i, mTrkEvent);
-                        RegistTempoEvent(mTrkEvent);
-                        return;
-                    }
-
-                    ticks += (int) Events[i].Ticks;
-                }
-
-                AddFirst(mTrkEvent, (uint) -ticks);
-            }
-        }
-
-        public void AddEvent(MTrkEvent mTrkEvent, uint absoluteTick)
+        public void AddEvent(MTrkEvent mTrkEvent, uint ticks)
         {
             Validation(mTrkEvent);
-            var ticks = absoluteTick;
             for (var i = 0; i < Events.Count; i++)
-            {
-                if (ticks < Events[i].Ticks)
-                {
-                    mTrkEvent.Ticks = ticks;
-                    _events.Insert(i + 1, mTrkEvent);
-                    SortEnd(mTrkEvent);
-                    return;
-                }
-
-                ticks -= Events[i].Ticks;
-            }
+                if (_events[i].Ticks > ticks)
+                    _events.Insert(i, mTrkEvent);
 
             mTrkEvent.Ticks = ticks;
             _events.Add(mTrkEvent);
             SortEnd(mTrkEvent);
         }
 
-        public void AddEvent(MTrkEvent mTrkEvent, float absoluteTime)
+        public void AddEvent(MTrkEvent mTrkEvent, float time)
         {
-            var absoluteTick = ConvertSecondToTicks(absoluteTime);
-            AddEvent(mTrkEvent, absoluteTick);
+            var ticks = ConvertSecondToTicks(time);
+            AddEvent(mTrkEvent, ticks);
         }
 
-        public void AddEvent(MTrkEvent originalEvent, MTrkEvent newEvent, int ticks = 0)
+        public void AddEvent(MTrkEvent originalEvent, MTrkEvent newEvent, int relativeTicks = 0)
         {
-            Validation(newEvent);
-            var originalIndex = _events.IndexOf(originalEvent);
-            AddEvent(newEvent, ticks, originalIndex);
+            AddEvent(newEvent, (uint) (originalEvent.Ticks + relativeTicks));
         }
 
         public void RemoveEvent(MTrkEvent mTrkEvent)
         {
             Validation(mTrkEvent);
-            var index = _events.IndexOf(mTrkEvent);
-            if (index > 0)
-                Events[index - 1].Ticks += mTrkEvent.Ticks;
-            _events.RemoveAt(index);
-
+            _events.Remove(mTrkEvent);
             if (mTrkEvent is TempoEvent tempoEvent)
             {
-                GetAbsoluteTick(tempoEvent, out var absoluteTick);
-                _tempoEvents.Remove(absoluteTick);
-                AllSeconds = ConvertSecondToTicks(AllTicks);
+                _tempoEvents.Remove(tempoEvent);
+                AllSeconds = ConvertTicksToSecond(AllTicks);
             }
         }
 
-        public void MoveEvent(MTrkEvent mTrkEvent, int ticks)
-        {
-            if (ticks == 0) return;
-            Validation(mTrkEvent);
-            var index = _events.IndexOf(mTrkEvent);
-            AddEvent(mTrkEvent, ticks, index);
-            RemoveEvent(mTrkEvent);
-        }
-
-        public NoteEventPair AddNoteEvent(MTrkEvent rootEvent, NoteEvent onNoteEvent, uint length,
-            float absoluteTime)
-        {
-            var absoluteTick = ConvertSecondToTicks(absoluteTime);
-            return AddNoteEvent(rootEvent, onNoteEvent, length, absoluteTick);
-        }
-
-        private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, float absoluteTime)
-        {
-            AddEvent(onNoteEvent, absoluteTime);
-            var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
-            return new NoteEventPair(onNoteEvent, offNoteEvent, length);
-        }
-
-        private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, uint absoluteTick)
-        {
-            AddEvent(onNoteEvent, absoluteTick);
-            var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
-            return new NoteEventPair(onNoteEvent, offNoteEvent, length);
-        }
-
-        private NoteEventPair AddNoteEvent(MTrkEvent rootEvent, OnNoteEvent onNoteEvent, uint length,
-            int ticks = 0)
-        {
-            AddEvent(rootEvent, onNoteEvent, ticks);
-            var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
-            return new NoteEventPair(onNoteEvent, offNoteEvent, length);
-        }
-
-        private OffNoteEvent AddOffNoteEvent(NoteEvent onNoteEvent, uint length)
-        {
-            var offNoteEvent = new OffNoteEvent(0, onNoteEvent.Channel, onNoteEvent.NoteNumber);
-            AddEvent(onNoteEvent, offNoteEvent, (int) length);
-            return offNoteEvent;
-        }
+        // public NoteEventPair AddNoteEvent(MTrkEvent rootEvent, NoteEvent onNoteEvent, uint length,
+        //     float absoluteTime)
+        // {
+        //     var absoluteTick = ConvertSecondToTicks(absoluteTime);
+        //     return AddNoteEvent(rootEvent, onNoteEvent, length, absoluteTick);
+        // }
+        //
+        // private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, float absoluteTime)
+        // {
+        //     AddEvent(onNoteEvent, absoluteTime);
+        //     var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
+        //     return new NoteEventPair(onNoteEvent, offNoteEvent, length);
+        // }
+        //
+        // private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, uint absoluteTick)
+        // {
+        //     AddEvent(onNoteEvent, absoluteTick);
+        //     var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
+        //     return new NoteEventPair(onNoteEvent, offNoteEvent, length);
+        // }
+        //
+        // private NoteEventPair AddNoteEvent(MTrkEvent rootEvent, OnNoteEvent onNoteEvent, uint length,
+        //     int ticks = 0)
+        // {
+        //     AddEvent(rootEvent, onNoteEvent, ticks);
+        //     var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
+        //     return new NoteEventPair(onNoteEvent, offNoteEvent, length);
+        // }
+        //
+        // private OffNoteEvent AddOffNoteEvent(NoteEvent onNoteEvent, uint length)
+        // {
+        //     var offNoteEvent = new OffNoteEvent(0, onNoteEvent.Channel, onNoteEvent.NoteNumber);
+        //     AddEvent(onNoteEvent, offNoteEvent, (int) length);
+        //     return offNoteEvent;
+        // }
     }
 }

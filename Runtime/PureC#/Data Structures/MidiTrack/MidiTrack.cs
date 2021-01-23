@@ -15,7 +15,7 @@ namespace Midity
         {
             DeltaTime = deltaTime;
             _events.Add(new TrackNameEvent(0, name));
-            _events.Add(new EndPointEvent(0));
+            _events.Add(new EndOfTrackEvent(0));
         }
 
         internal MidiTrack(uint deltaTime, List<MTrkEvent> events)
@@ -47,16 +47,16 @@ namespace Midity
                         break;
                 }
 
-            AllSeconds = ConvertTicksToSecond(AllTicks);
+            TotalSeconds = ConvertTicksToSecond(TotalTicks);
         }
 
         public uint DeltaTime { get; }
-        public uint AllTicks => Events.Last().Ticks;
-        public float AllSeconds { get; private set; }
+        public uint TotalTicks => Events.Last().Ticks;
+        public float TotalSeconds { get; private set; }
 
         public IReadOnlyList<MTrkEvent> Events => _events;
         public IReadOnlyList<NoteEventPair> NoteEventPairs => _noteEventPairs;
-        public uint Bars => (AllTicks + DeltaTime * 4 - 1) / (DeltaTime * 4);
+        public uint Bars => (TotalTicks + DeltaTime * 4 - 1) / (DeltaTime * 4);
 
         public string Name
         {
@@ -78,8 +78,8 @@ namespace Midity
         {
             var ticks = 0u;
             var tempo = 120f;
-            ticks += (uint) Math.Floor(time / AllSeconds) * AllTicks;
-            time %= AllSeconds;
+            ticks += (uint) Math.Floor(time / TotalSeconds) * TotalTicks;
+            time %= TotalSeconds;
             var offsetTicks = 0u;
             foreach (var tempoEvent in _tempoEvents)
             {
@@ -136,8 +136,8 @@ namespace Midity
                     throw new AggregateException($"{nameof(TrackNameEvent)}");
                 case CopyrightEvent copyrightEvent:
                     throw new AggregateException($"{nameof(CopyrightEvent)}");
-                case EndPointEvent endPointEvent:
-                    throw new AggregateException($"{nameof(EndPointEvent)}");
+                case EndOfTrackEvent endPointEvent:
+                    throw new AggregateException($"{nameof(EndOfTrackEvent)}");
             }
         }
 
@@ -145,7 +145,7 @@ namespace Midity
         {
             if (!(mTrkEvent is TempoEvent tempoEvent)) return;
             _tempoEvents.Add(tempoEvent);
-            AllSeconds = ConvertTicksToSecond(AllTicks);
+            TotalSeconds = ConvertTicksToSecond(TotalTicks);
         }
 
         private void AddFirst(MTrkEvent mTrkEvent, uint offsetTicks)
@@ -178,7 +178,7 @@ namespace Midity
             if (Events.Last() != mTrkEvent)
                 return;
             var endPointEvent = Events[Events.Count - 2];
-            if (!(endPointEvent is EndPointEvent)) throw new Exception();
+            if (!(endPointEvent is EndOfTrackEvent)) throw new Exception();
             _events.RemoveAt(Events.Count - 2);
             _events.Add(endPointEvent);
             RegistTempoEvent(mTrkEvent);
@@ -214,8 +214,14 @@ namespace Midity
             if (mTrkEvent is TempoEvent tempoEvent)
             {
                 _tempoEvents.Remove(tempoEvent);
-                AllSeconds = ConvertTicksToSecond(AllTicks);
+                TotalSeconds = ConvertTicksToSecond(TotalTicks);
             }
+        }
+
+        public void MoveEvent(MTrkEvent mTrkEvent, uint tick)
+        {
+            RemoveEvent(mTrkEvent);
+            AddEvent(mTrkEvent, tick);
         }
 
         // public NoteEventPair AddNoteEvent(MTrkEvent rootEvent, NoteEvent onNoteEvent, uint length,

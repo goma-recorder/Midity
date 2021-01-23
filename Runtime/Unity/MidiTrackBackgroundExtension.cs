@@ -20,7 +20,7 @@ namespace Midity
                 noteNumberRange = noteTable.Max(x => x.NoteNumber) - minNoteNumber;
             }
 
-            var texture = new Texture2D((int) midiTrack.AllTicks / noteWidthRate,
+            var texture = new Texture2D((int) midiTrack.TotalTicks / noteWidthRate,
                 bottomMargin + noteNumberRange + topMargin, TextureFormat.RGBA32, false, true)
             {
                 filterMode = FilterMode.Point

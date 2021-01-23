@@ -23,26 +23,26 @@ namespace Midity
         private int _headIndex;
         private uint _lastTick;
         private float _lastTime;
-        public float LastTime => IsFinished ? track.AllSeconds : _lastTime;
+        public float LastTime => IsFinished ? track.TotalSeconds : _lastTime;
         public bool canLoop = true;
         public bool IsFinished => _headIndex >= track.Events.Count;
 
         public void ResetHead(float time)
         {
-            if (!canLoop && time >= track.AllSeconds)
+            if (!canLoop && time >= track.TotalSeconds)
             {
                 _headIndex = track.Events.Count;
                 return;
             }
 
-            _lastTime = time % track.AllSeconds;
+            _lastTime = time % track.TotalSeconds;
             ResetHead(track.ConvertSecondToTicks(_lastTime));
         }
 
         private void ResetHead(uint targetTick)
         {
-            if (!canLoop && targetTick > track.AllTicks) return;
-            targetTick %= track.AllTicks;
+            if (!canLoop && targetTick > track.TotalTicks) return;
+            targetTick %= track.TotalTicks;
             for (var i = 0; i < track.Events.Count; i++)
                 if (targetTick >= track.Events[i].Ticks)
                 {
@@ -69,7 +69,7 @@ namespace Midity
                     if (!canLoop) return;
                     _headIndex = 0;
                     ResetHead(0);
-                    _lastTick %= track.AllTicks;
+                    _lastTick %= track.TotalTicks;
                 }
             }
         }
@@ -92,13 +92,13 @@ namespace Midity
                 if (_headIndex == track.Events.Count)
                     if (canLoop)
                     {
-                        deltaTime = _lastTime - track.AllSeconds;
+                        deltaTime = _lastTime - track.TotalSeconds;
                         ResetHead(0f);
                         PlayByDeltaTime(deltaTime);
                     }
                     else
                     {
-                        _lastTime = track.AllSeconds;
+                        _lastTime = track.TotalSeconds;
                         return;
                     }
             }

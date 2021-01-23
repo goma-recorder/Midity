@@ -126,8 +126,8 @@ namespace Midity
                 case PortNumberEvent portNumberEvent:
                     WriteBytesDataMetaEvent(portNumberEvent, portNumberEvent.Number);
                     break;
-                case EndPointEvent endPointEvent:
-                    WriteBytesDataMetaEvent(endPointEvent);
+                case EndOfTrackEvent endOfTrackEvent:
+                    WriteBytesDataMetaEvent(endOfTrackEvent);
                     break;
                 case TempoEvent tempoEvent:
                     WriteBytesDataMetaEvent(

@@ -352,11 +352,11 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void EndPointEvent()
+            public void EndOfTrackEvent()
             {
                 var ticks = 18246u;
 
-                var x = new EndPointEvent(ticks);
+                var x = new EndOfTrackEvent(ticks);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);

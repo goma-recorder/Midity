@@ -170,8 +170,8 @@ namespace Midity
                 case PortNumberEvent.META_ID:
                     return new PortNumberEvent(ticks, _reader.ReadByte());
                 // 2f
-                case EndPointEvent.META_ID:
-                    return new EndPointEvent(ticks);
+                case EndOfTrackEvent.META_ID:
+                    return new EndOfTrackEvent(ticks);
                 // 51
                 case TempoEvent.META_ID:
                     return new TempoEvent(ticks, _reader.ReadBEUInt((byte) length));

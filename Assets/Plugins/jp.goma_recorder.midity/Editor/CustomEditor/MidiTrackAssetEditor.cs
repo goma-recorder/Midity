@@ -10,7 +10,6 @@ namespace Midity.Playable.Editor
     [CustomEditor(typeof(MidiTrackAsset))]
     internal class MidiTrackAssetEditor : UnityEditor.Editor
     {
-        private readonly List<string> _eventTexts = new List<string>();
         private string _ccText;
         private string _durationText;
         private string _noteText;
@@ -26,10 +25,8 @@ namespace Midity.Playable.Editor
             var note = new HashSet<(byte number, NoteOctave octave, NoteName name)>();
             var cc = new HashSet<int>();
 
-            _eventTexts.Clear();
             foreach (var e in track.Events)
             {
-                _eventTexts.Add(e.ToString());
                 switch (e)
                 {
                     case OnNoteEvent onNoteEvent:
@@ -64,7 +61,6 @@ namespace Midity.Playable.Editor
             EditorGUILayout.LabelField("Note", _noteText);
             EditorGUILayout.LabelField("CC", _ccText);
             EditorGUI.indentLevel--;
-            foreach (var s in _eventTexts) EditorGUILayout.LabelField(s);
         }
 
         private Texture2D _texture2D;

@@ -11,20 +11,24 @@ namespace Midity
         private readonly List<NoteEventPair> _noteEventPairs = new List<NoteEventPair>();
         private TrackNameEvent _trackNameEvent;
 
-        internal MidiTrack(string name, uint deltaTime)
+        internal MidiTrack(MidiFile midiFile, string name, uint deltaTime)
         {
+            MidiFile = midiFile;
             DeltaTime = deltaTime;
-            _events.Add(new TrackNameEvent(0, name));
-            _events.Add(new EndOfTrackEvent(0));
+            _events.Add(new TrackNameEvent(0, name) {Track = this});
+            _events.Add(new EndOfTrackEvent(0) {Track = this});
         }
 
-        internal MidiTrack(uint deltaTime, List<MTrkEvent> events)
+        internal MidiTrack(MidiFile midiFile, uint deltaTime, List<MTrkEvent> events)
         {
+            MidiFile = midiFile;
             DeltaTime = deltaTime;
             _events = events;
 
             var noteTable = new List<OnNoteEvent>();
             foreach (var x in Events)
+            {
+                x.Track = this;
                 switch (x)
                 {
                     case OnNoteEvent onNoteEvent:
@@ -46,10 +50,12 @@ namespace Midity
                         _tempoEvents.Add(tempoEvent);
                         break;
                 }
+            }
 
             TotalSeconds = ConvertTicksToSecond(TotalTicks);
         }
 
+        public MidiFile MidiFile { get; private set; }
         public uint DeltaTime { get; }
         public uint TotalTicks => Events.Last().Ticks;
         public float TotalSeconds { get; private set; }
@@ -187,11 +193,13 @@ namespace Midity
         public void AddEvent(MTrkEvent mTrkEvent, uint ticks)
         {
             Validation(mTrkEvent);
+            mTrkEvent.Ticks = ticks;
+            mTrkEvent.Track = this;
+
             for (var i = 0; i < Events.Count; i++)
                 if (_events[i].Ticks > ticks)
                     _events.Insert(i, mTrkEvent);
 
-            mTrkEvent.Ticks = ticks;
             _events.Add(mTrkEvent);
             SortEnd(mTrkEvent);
         }

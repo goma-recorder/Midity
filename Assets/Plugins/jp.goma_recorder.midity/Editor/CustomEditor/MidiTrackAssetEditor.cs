@@ -26,7 +26,6 @@ namespace Midity.Playable.Editor
             var cc = new HashSet<int>();
 
             foreach (var e in track.Events)
-            {
                 switch (e)
                 {
                     case OnNoteEvent onNoteEvent:
@@ -36,7 +35,6 @@ namespace Midity.Playable.Editor
                         cc.Add((int) controlChangeEvent.controller);
                         break;
                 }
-            }
 
             if (note.Count == 0)
             {

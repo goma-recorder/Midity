@@ -31,7 +31,7 @@ namespace Midity
 
         public MidiTrack AddNewTrack(string name)
         {
-            var track = new MidiTrack(name, DeltaTime);
+            var track = new MidiTrack(this, name, DeltaTime);
 
             if (_tracks.Contains(track)) return null;
 
@@ -42,7 +42,7 @@ namespace Midity
         public MidiTrack AddTrack(int trackNumber, List<MTrkEvent> events)
         {
             if (Tracks.Count < trackNumber) return null;
-            var track = new MidiTrack(DeltaTime, events);
+            var track = new MidiTrack(this, DeltaTime, events);
             _tracks.Add(track);
             return track;
         }

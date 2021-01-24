@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace Midity.Editor
 {
-    public sealed class QueueEventLabel : MetaEventLabel
+    public sealed class TimeSignatureEventLabel : MetaEventLabel
     {
-        public QueueEventLabel() : base()
+        public TimeSignatureEventLabel() : base()
         {
         }
 
-        public QueueEventLabel(QueueEvent queueEvent) : base(queueEvent)
+        public TimeSignatureEventLabel(TimeSignatureEvent timeSignatureEvent) : base(timeSignatureEvent)
         {
         }
 
-        public new class UxmlFactory : UxmlFactory<QueueEventLabel, UxmlTraits>
+        public new class UxmlFactory : UxmlFactory<TimeSignatureEventLabel, UxmlTraits>
         {
         }
 

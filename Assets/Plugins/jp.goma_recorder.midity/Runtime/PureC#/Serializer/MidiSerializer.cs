@@ -111,8 +111,8 @@ namespace Midity
                 case MarkerEvent markerEvent:
                     WriteTextMetaEvent(markerEvent, markerEvent.text);
                     break;
-                case QueueEvent queueEvent:
-                    WriteTextMetaEvent(queueEvent, queueEvent.text);
+                case CuePointEvent cuePointEvent:
+                    WriteTextMetaEvent(cuePointEvent, cuePointEvent.text);
                     break;
                 case ProgramNameEvent programNameEvent:
                     WriteTextMetaEvent(programNameEvent, programNameEvent.name);
@@ -145,13 +145,13 @@ namespace Midity
                         smpteOffsetEvent.fr,
                         smpteOffsetEvent.ff);
                     break;
-                case BeatEvent beatEvent:
+                case TimeSignatureEvent timeSignatureEvent:
                     WriteBytesDataMetaEvent(
-                        beatEvent,
-                        beatEvent.numerator,
-                        beatEvent.denominator,
-                        beatEvent.midiClocksPerClick,
-                        beatEvent.numberOfNotated32nds);
+                        timeSignatureEvent,
+                        timeSignatureEvent.numerator,
+                        timeSignatureEvent.denominator,
+                        timeSignatureEvent.midiClocksPerClick,
+                        timeSignatureEvent.numberOfNotated32nds);
                     break;
                 case KeyEvent keyEvent:
                     WriteBytesDataMetaEvent(

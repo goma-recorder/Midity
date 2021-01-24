@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace Midity.Editor
 {
-    public sealed class BeatEventLabel : MetaEventLabel
+    public sealed class CuePointEventLabel : MetaEventLabel
     {
-        public BeatEventLabel() : base()
+        public CuePointEventLabel() : base()
         {
         }
 
-        public BeatEventLabel(BeatEvent beatEvent) : base(beatEvent)
+        public CuePointEventLabel(CuePointEvent cuePointEvent) : base(cuePointEvent)
         {
         }
 
-        public new class UxmlFactory : UxmlFactory<BeatEventLabel, UxmlTraits>
+        public new class UxmlFactory : UxmlFactory<CuePointEventLabel, UxmlTraits>
         {
         }
 

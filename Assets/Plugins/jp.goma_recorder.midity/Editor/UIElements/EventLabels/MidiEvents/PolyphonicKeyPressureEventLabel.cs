@@ -9,7 +9,8 @@ namespace Midity.Editor
         {
         }
 
-        public PolyphonicKeyPressureEventLabel(PolyphonicKeyPressureEvent polyphonicKeyPressureEvent) : base(polyphonicKeyPressureEvent)
+        public PolyphonicKeyPressureEventLabel(PolyphonicKeyPressureEvent polyphonicKeyPressureEvent) : base(
+            polyphonicKeyPressureEvent)
         {
         }
 

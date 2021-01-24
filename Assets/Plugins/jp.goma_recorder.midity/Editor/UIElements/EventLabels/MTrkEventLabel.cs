@@ -57,8 +57,8 @@ namespace Midity.Editor
                     return new LyricEventLabel(lyricEvent);
                 case MarkerEvent markerEvent:
                     return new MarkerEventLabel(markerEvent);
-                case QueueEvent queueEvent:
-                    return new QueueEventLabel(queueEvent);
+                case CuePointEvent queueEvent:
+                    return new CuePointEventLabel(queueEvent);
                 case ProgramNameEvent programNameEvent:
                     return new ProgramNameEventLabel(programNameEvent);
                 case DeviceNameEvent deviceNameEvent:
@@ -73,8 +73,8 @@ namespace Midity.Editor
                     return new TempoEventLabel(tempoEvent);
                 case SmpteOffsetEvent smpteOffsetEvent:
                     return new SmpteOffsetEventLabel(smpteOffsetEvent);
-                case BeatEvent beatEvent:
-                    return new BeatEventLabel(beatEvent);
+                case TimeSignatureEvent beatEvent:
+                    return new TimeSignatureEventLabel(beatEvent);
                 case KeyEvent keyEvent:
                     return new KeyEventLabel(keyEvent);
                 case SequencerUniqueEvent sequencerUniqueEvent:

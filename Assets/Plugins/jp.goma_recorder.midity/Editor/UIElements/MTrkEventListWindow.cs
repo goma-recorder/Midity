@@ -14,7 +14,7 @@ namespace Midity.Editor
         [MenuItem("Window/Midity/MTrkEventListWindow")]
         public static void ShowExample()
         {
-            MTrkEventListWindoww wnd = GetWindow<MTrkEventListWindoww>();
+            var wnd = GetWindow<MTrkEventListWindoww>();
             wnd.titleContent = new GUIContent("MTrkEventList");
         }
 

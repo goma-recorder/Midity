@@ -45,7 +45,7 @@ namespace Midity.Tests
             [Test]
             public void SerializeTrack()
             {
-                var track1 = new MidiTrack("Name", 94);
+                var track1 = new MidiTrack(null, "Name", 94);
                 MidiTrack track2;
                 using (var stream = new MemoryStream())
                 {
@@ -293,7 +293,7 @@ namespace Midity.Tests
                 var ticks = 20202u;
                 var text = "queue";
 
-                var x = new QueueEvent(ticks, text);
+                var x = new CuePointEvent(ticks, text);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
@@ -404,7 +404,7 @@ namespace Midity.Tests
                 byte cc = 0;
                 byte bb = 0;
 
-                var x = new BeatEvent(ticks, nn, dd, cc, bb);
+                var x = new TimeSignatureEvent(ticks, nn, dd, cc, bb);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);

@@ -12,6 +12,7 @@ namespace Midity
         }
 
         public abstract byte Status { get; }
+        public MidiTrack Track { get; internal set; }
         public uint Ticks { get; internal set; }
 
         protected abstract Type ToString(List<string> list);

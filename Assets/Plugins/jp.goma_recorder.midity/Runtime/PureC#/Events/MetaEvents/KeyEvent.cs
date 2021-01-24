@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class KeyEvent : MetaEvent
     {
@@ -28,12 +25,6 @@ namespace Midity
         {
             get => noteKey.ToKeyAccidentalSign_Tonality().tonality;
             set => noteKey = (KeyAccidentalSign, value).ToKey();
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(noteKey.ToString());
-            return typeof(KeyEvent);
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class SequencerUniqueEvent : MetaEvent
     {
@@ -17,12 +13,6 @@ namespace Midity
 
         public SequencerUniqueEvent(byte[] data) : this(0, data)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.AddRange(data.Select(n => n.ToString()));
-            return typeof(SequencerUniqueEvent);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class TempoEvent : MetaEvent
     {
@@ -33,12 +30,6 @@ namespace Midity
         {
             get => 60000000f / TickTempo;
             internal set => _tickTempo = (uint) (60000000f / value);
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(Tempo.ToString());
-            return typeof(TempoEvent);
         }
     }
 }

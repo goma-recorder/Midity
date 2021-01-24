@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class ChannelPrefixEvent : MetaEvent
     {
@@ -16,11 +13,6 @@ namespace Midity
 
         public ChannelPrefixEvent(byte data) : this(0, data)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(ChannelPrefixEvent);
         }
     }
 }

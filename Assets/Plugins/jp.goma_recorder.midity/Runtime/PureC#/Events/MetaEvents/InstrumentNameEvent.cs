@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class InstrumentNameEvent : MetaEvent
     {
@@ -16,12 +13,6 @@ namespace Midity
 
         public InstrumentNameEvent(string name) : this(0, name)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(name);
-            return typeof(InstrumentNameEvent);
         }
     }
 }

@@ -30,9 +30,9 @@ $ openupm add jp.goma_recorder.midity
 
 ## Suport Events
 - Midi Event
-    - `Note`, `PolyphonicKeyPressure`, `ControlChange`, `ProgramChange`, `ChannelPressure`, `PitchBend`
+    - `OnNote`, `OffNote`, `PolyphonicKeyPressure`, `ControlChange`, `ProgramChange`, `ChannelPressure`, `PitchBend`
 - Meta Event
-    - `SequenceNumber`, `Text`, `Copyright`, `TrackName`, `InstrumentName`, `Lyric`, `Marker`, `Queue`, `ProgramName`, `DeviceName`, `ChannelPrefix`, `PortNumber`, `EndPoint`, `Tempo`, `SmpteOffset`, `Beat`, `Key`, `SequencerUnique`
+    - `SequenceNumber`, `Text`, `Copyright`, `TrackName`, `InstrumentName`, `Lyric`, `Marker`, `Queue`, `ProgramName`, `DeviceName`, `ChannelPrefix`, `PortNumber`, `EndOfTrack`, `Tempo`, `SmpteOffset`, `TimeSignature`, `Key`, `SequencerUnique`
 - SysEx Event
 
 ## Packages that depend on this

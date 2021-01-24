@@ -32,8 +32,8 @@ namespace Midity.Tests
                             Assert.That(midiFile1.Tracks[i].Events.Count == midiFile2.Tracks[i].Events.Count);
                             for (var j = 0; j < midiFile1.Tracks[i].Events.Count; j++)
                                 Assert.That(
-                                    midiFile1.Tracks[i].Events[j].ToString() ==
-                                    midiFile2.Tracks[i].Events[j].ToString());
+                                    midiFile1.Tracks[i].Events[j].GetType() ==
+                                    midiFile2.Tracks[i].Events[j].GetType());
                         }
                     }
                 }
@@ -59,7 +59,7 @@ namespace Midity.Tests
 
                 Assert.That(track1.Events.Count == track2.Events.Count);
                 for (var i = 0; i < track1.Events.Count; i++)
-                    Assert.That(track1.Events[i].ToString() == track2.Events[i].ToString());
+                    Assert.That(track1.Events[i].GetType() == track2.Events[i].GetType());
             }
         }
 
@@ -288,7 +288,7 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void QueueEvent()
+            public void CuePointEvent()
             {
                 var ticks = 20202u;
                 var text = "queue";
@@ -396,7 +396,7 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void BeatEvent()
+            public void TimeSignatureEvent()
             {
                 var ticks = 19864u;
                 byte nn = 0;

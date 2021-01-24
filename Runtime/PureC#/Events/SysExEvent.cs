@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class SysExEvent : MTrkEvent
     {
@@ -18,11 +14,5 @@ namespace Midity
         }
 
         public override byte Status => 0xf0;
-
-        protected override Type ToString(List<string> list)
-        {
-            list.AddRange(data.Select(d => d.ToString()));
-            return typeof(SysExEvent);
-        }
     }
 }

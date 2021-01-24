@@ -232,40 +232,12 @@ namespace Midity
             AddEvent(mTrkEvent, tick);
         }
 
-        // public NoteEventPair AddNoteEvent(MTrkEvent rootEvent, NoteEvent onNoteEvent, uint length,
-        //     float absoluteTime)
-        // {
-        //     var absoluteTick = ConvertSecondToTicks(absoluteTime);
-        //     return AddNoteEvent(rootEvent, onNoteEvent, length, absoluteTick);
-        // }
-        //
-        // private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, float absoluteTime)
-        // {
-        //     AddEvent(onNoteEvent, absoluteTime);
-        //     var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
-        //     return new NoteEventPair(onNoteEvent, offNoteEvent, length);
-        // }
-        //
-        // private NoteEventPair AddNoteEvent(OnNoteEvent onNoteEvent, uint length, uint absoluteTick)
-        // {
-        //     AddEvent(onNoteEvent, absoluteTick);
-        //     var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
-        //     return new NoteEventPair(onNoteEvent, offNoteEvent, length);
-        // }
-        //
-        // private NoteEventPair AddNoteEvent(MTrkEvent rootEvent, OnNoteEvent onNoteEvent, uint length,
-        //     int ticks = 0)
-        // {
-        //     AddEvent(rootEvent, onNoteEvent, ticks);
-        //     var offNoteEvent = AddOffNoteEvent(onNoteEvent, length);
-        //     return new NoteEventPair(onNoteEvent, offNoteEvent, length);
-        // }
-        //
-        // private OffNoteEvent AddOffNoteEvent(NoteEvent onNoteEvent, uint length)
-        // {
-        //     var offNoteEvent = new OffNoteEvent(0, onNoteEvent.Channel, onNoteEvent.NoteNumber);
-        //     AddEvent(onNoteEvent, offNoteEvent, (int) length);
-        //     return offNoteEvent;
-        // }
+        public NoteEventPair AddNoteEvent(uint ticks, byte channel, byte noteNumber, byte velocity, uint length)
+        {
+            var onNoteEvent = new OnNoteEvent(ticks, channel, noteNumber, velocity);
+            AddEvent(onNoteEvent, ticks);
+            var offNoteEvent = new OffNoteEvent(ticks + length, channel, noteNumber);
+            return new NoteEventPair(onNoteEvent, offNoteEvent);
+        }
     }
 }

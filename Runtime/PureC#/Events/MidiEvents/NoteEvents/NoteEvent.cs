@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public abstract class NoteEvent : MidiEvent
     {
@@ -35,12 +32,6 @@ namespace Midity
         {
             get => NoteEnumUtil.ToNoteOctave(NoteNumber);
             internal set => NoteNumber = (NoteName, value).ToNoteNumber();
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(NoteNumber.ToString());
-            return typeof(NoteEvent);
         }
     }
 }

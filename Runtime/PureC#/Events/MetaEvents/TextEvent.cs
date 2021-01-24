@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class TextEvent : MetaEvent
     {
@@ -16,12 +13,6 @@ namespace Midity
 
         public TextEvent(string text) : this(0, text)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(text);
-            return typeof(TextEvent);
         }
     }
 }

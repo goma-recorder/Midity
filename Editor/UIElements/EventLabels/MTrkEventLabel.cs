@@ -1,6 +1,4 @@
-﻿using System;
-using UnityEditor.UIElements;
-using UnityEngine;
+﻿using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 namespace Midity.Editor

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Midity
 {
@@ -29,14 +28,5 @@ namespace Midity
 
         public byte TopNumber => numerator;
         public byte BottomNumber => (byte) Math.Pow(2, denominator);
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(numerator.ToString());
-            list.Add(denominator.ToString());
-            list.Add(midiClocksPerClick.ToString());
-            list.Add(numberOfNotated32nds.ToString());
-            return typeof(TimeSignatureEvent);
-        }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class EndOfTrackEvent : MetaEvent
     {
@@ -10,11 +7,6 @@ namespace Midity
 
         internal EndOfTrackEvent(uint ticks) : base(ticks)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(EndOfTrackEvent);
         }
     }
 }

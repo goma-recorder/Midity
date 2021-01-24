@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class ProgramNameEvent : MetaEvent
     {
@@ -16,11 +13,6 @@ namespace Midity
 
         public ProgramNameEvent(string name) : this(0, name)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(ProgramNameEvent);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class PolyphonicKeyPressureEvent : MidiEvent
     {
@@ -22,10 +19,5 @@ namespace Midity
         }
 
         protected override byte StatusHead => STATUS_HEAD;
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(PolyphonicKeyPressureEvent);
-        }
     }
 }

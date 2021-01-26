@@ -9,6 +9,7 @@
         {
             this.onNoteEvent = onNoteEvent;
             this.offNoteEvent = offNoteEvent;
+            this.onNoteEvent.NoteEventPair = this.offNoteEvent.NoteEventPair = this;
         }
 
         public uint OnTick => onNoteEvent.Ticks;

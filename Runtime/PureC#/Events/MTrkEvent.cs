@@ -12,6 +12,7 @@ namespace Midity
         public abstract byte Status { get; }
         public MidiTrack Track { get; internal set; }
         public uint Ticks { get; internal set; }
+        public float Seconds => Track?.ConvertTicksToSecond(Ticks) ?? -1f;
 
         private static void ThrowException(string name, long input, long min, long max)
         {

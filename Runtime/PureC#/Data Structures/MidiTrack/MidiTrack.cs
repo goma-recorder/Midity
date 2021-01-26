@@ -62,6 +62,7 @@ namespace Midity
 
         public IReadOnlyList<MTrkEvent> Events => _events;
         public IReadOnlyList<NoteEventPair> NoteEventPairs => _noteEventPairs;
+        public IReadOnlyList<TempoEvent> TempoEvents => _tempoEvents;
         public uint Bars => (TotalTicks + DeltaTime * 4 - 1) / (DeltaTime * 4);
 
         public string Name
@@ -132,6 +133,74 @@ namespace Midity
 
             time += tick * 60 / (tempo * DeltaTime);
             return time;
+        }
+
+        private (int index, int compare) GetEventIndexAtTick(uint tick)
+        {
+            var min = 0;
+            var max = Events.Count - 1;
+            var compare = 0;
+
+            var mid = 0;
+            while (min <= max)
+            {
+                mid = min + (max - min) / 2;
+                compare = tick.CompareTo(Events[mid].Ticks);
+                switch (compare)
+                {
+                    case 1:
+                        min = mid + 1;
+                        break;
+                    case -1:
+                        max = mid - 1;
+                        break;
+                    case 0:
+                        while (mid > 0 && tick == Events[mid - 1].Ticks)
+                            mid--;
+                        return (mid, compare);
+                }
+            }
+
+            return (mid, compare);
+        }
+
+        public MTrkEvent GetEventAtTick(uint tick)
+        {
+            var (index, compare) = GetEventIndexAtTick(tick);
+            return compare == 0 ? Events[index] : null;
+        }
+
+        public MTrkEvent GetEventAfterTick(uint tick)
+        {
+            var (index, compare) = GetEventIndexAtTick(tick);
+
+            switch (compare)
+            {
+                case 0:
+                    return Events[index];
+                case 1:
+                    return ++index < Events.Count ? Events[index] : null;
+                case -1:
+                    return Events[index];
+                default:
+                    return null;
+            }
+        }
+
+        public MTrkEvent GetEventBeforeTick(uint tick)
+        {
+            var (index, compare) = GetEventIndexAtTick(tick);
+            switch (compare)
+            {
+                case 0:
+                    return Events[index];
+                case 1:
+                    return Events[index];
+                case -1:
+                    return index > 0 ? Events[--index] : null;
+                default:
+                    return null;
+            }
         }
 
         private void Validation<T>(T mTrkEvent) where T : MTrkEvent

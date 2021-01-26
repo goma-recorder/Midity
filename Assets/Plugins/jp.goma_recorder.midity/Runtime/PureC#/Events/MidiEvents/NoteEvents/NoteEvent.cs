@@ -15,6 +15,8 @@
         {
         }
 
+        public NoteEventPair NoteEventPair { get; internal set; }
+
         public byte NoteNumber
         {
             get => _noteNumber;

@@ -56,7 +56,7 @@ namespace Midity
         {
             if (IsFinished) return;
             _lastTick += deltaTicks;
-            _lastTime = track.ConvertTicksToSecond(deltaTicks);
+            _lastTime = track.ConvertTicksToSecond(_lastTick);
 
             while (true)
             {
@@ -83,10 +83,10 @@ namespace Midity
             var currentTick = track.ConvertSecondToTicks(_lastTime);
 
             var deltaTick = currentTick - _lastTick;
-            while (track.Events[_headIndex].Ticks <= deltaTick)
+            while (track.Events[_headIndex].Ticks - _lastTick <= deltaTick)
             {
-                _lastTick += track.Events[_headIndex].Ticks;
-                deltaTick -= track.Events[_headIndex].Ticks;
+                deltaTick -= track.Events[_headIndex].Ticks - _lastTick;
+                _lastTick = track.Events[_headIndex].Ticks;
                 onPush?.Invoke(track.Events[_headIndex]);
                 _headIndex++;
                 if (_headIndex == track.Events.Count)

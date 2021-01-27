@@ -19,8 +19,6 @@ namespace Midity.Playable.Editor
             var asset = (MidiTrackAsset) target;
 
             var track = asset.MidiTrack;
-            var bars = track.Bars;
-            _durationText = bars + (bars > 1 ? " bars" : " bar");
 
             var note = new HashSet<(byte number, NoteOctave octave, NoteName name)>();
             var cc = new HashSet<int>();

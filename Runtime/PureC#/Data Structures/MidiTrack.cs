@@ -63,7 +63,6 @@ namespace Midity
         public IReadOnlyList<MTrkEvent> Events => _events;
         public IReadOnlyList<NoteEventPair> NoteEventPairs => _noteEventPairs;
         public IReadOnlyList<TempoEvent> TempoEvents => _tempoEvents;
-        public uint Bars => (TotalTicks + DeltaTime * 4 - 1) / (DeltaTime * 4);
 
         public string Name
         {

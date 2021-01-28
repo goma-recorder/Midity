@@ -6,12 +6,12 @@ using UnityEditor.UIElements;
 
 namespace Midity.Editor
 {
-    public class MTrkEventListWindoww : EditorWindow
+    public class MTrkEventListWindow : EditorWindow
     {
         [MenuItem("Window/Midity/MTrkEventListWindow")]
         public static void ShowExample()
         {
-            var wnd = GetWindow<MTrkEventListWindoww>();
+            var wnd = GetWindow<MTrkEventListWindow>();
             wnd.titleContent = new GUIContent("MTrkEventList");
         }
 
@@ -21,7 +21,7 @@ namespace Midity.Editor
             var root = rootVisualElement;
 
             // Import UXML
-            var listWindow = Resources.Load<VisualTreeAsset>("MTrkEventList").Instantiate();
+            var listWindow = Resources.Load<VisualTreeAsset>("Windows/MTrkEventList").Instantiate();
             root.Add(listWindow);
 
             var eventList = listWindow.Q<ScrollView>("EventList");

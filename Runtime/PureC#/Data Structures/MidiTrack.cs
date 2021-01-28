@@ -180,6 +180,14 @@ namespace Midity
                 case 1:
                     return ++index < Events.Count ? Events[index] : null;
                 case -1:
+                    while (index > 0)
+                    {
+                        if (Events[index - 1].Ticks == Events[index].Ticks)
+                            index--;
+                        else
+                            return Events[index];
+                    }
+
                     return Events[index];
                 default:
                     return null;
@@ -194,9 +202,27 @@ namespace Midity
                 case 0:
                     return Events[index];
                 case 1:
+                    while (index > 0)
+                    {
+                        if (Events[index - 1].Ticks == Events[index].Ticks)
+                            index--;
+                        else
+                            return Events[index];
+                    }
+
                     return Events[index];
                 case -1:
-                    return index > 0 ? Events[--index] : null;
+                    index--;
+                    if (index <= 0) return null;
+                    while (index > 0)
+                    {
+                        if (Events[index - 1].Ticks == Events[index].Ticks)
+                            index--;
+                        else
+                            return Events[index];
+                    }
+
+                    return Events[index];
                 default:
                     return null;
             }

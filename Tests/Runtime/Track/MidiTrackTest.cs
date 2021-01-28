@@ -1,6 +1,7 @@
 ﻿using Midity;
 using NUnit.Framework;
 using System.IO;
+using UnityEngine;
 
 namespace Tests
 {
@@ -25,7 +26,7 @@ namespace Tests
             var e = midiFile.Tracks[0].GetEventAtTick(0);
             Assert.That(midiFile.Tracks[0].Events[0] == e);
         }
-        
+
         [Test]
         public void GetEventAfterTick()
         {
@@ -33,13 +34,14 @@ namespace Tests
             var e = midiFile.Tracks[0].GetEventAfterTick(1);
             Assert.That(e.Ticks >= 1);
         }
-        
+
         [Test]
         public void GetEventBeforeTick()
         {
             var midiFile = LoadMidiFile();
-            var e = midiFile.Tracks[0].GetEventBeforeTick(751);
-            Assert.That(e.Ticks <= 751);
+            var e = midiFile.Tracks[0].GetEventBeforeTick(1);
+            Assert.That(e.Ticks <= 1);
+            Assert.That(e == midiFile.Tracks[0].Events[0]);
         }
     }
 }

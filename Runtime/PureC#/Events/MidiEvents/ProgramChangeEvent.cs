@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class ProgramChangeEvent : MidiEvent
     {
@@ -18,11 +15,5 @@ namespace Midity
         }
 
         protected override byte StatusHead => STATUS_HEAD;
-
-        protected override Type ToString(List<string> list)
-        {
-            list.Add(instrument.ToString());
-            return typeof(ProgramChangeEvent);
-        }
     }
 }

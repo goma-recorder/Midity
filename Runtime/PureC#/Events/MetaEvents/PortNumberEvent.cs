@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class PortNumberEvent : MetaEvent
     {
@@ -22,11 +19,6 @@ namespace Midity
         {
             get => _number;
             set => SetIfInRange(nameof(Number), out _number, value, 0x7F);
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(PortNumberEvent);
         }
     }
 }

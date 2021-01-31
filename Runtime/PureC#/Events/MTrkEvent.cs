@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Midity
 {
@@ -12,19 +10,9 @@ namespace Midity
         }
 
         public abstract byte Status { get; }
+        public MidiTrack Track { get; internal set; }
         public uint Ticks { get; internal set; }
-
-        protected abstract Type ToString(List<string> list);
-
-        public override string ToString()
-        {
-            var list = new List<string>();
-            var sb = new StringBuilder();
-            var typeName = ToString(list).Name;
-            sb.Append($"{typeName}: {Ticks}, ");
-            sb.Append(string.Join(", ", list));
-            return sb.ToString();
-        }
+        public float Seconds => Track?.ConvertTicksToSecond(Ticks) ?? -1f;
 
         private static void ThrowException(string name, long input, long min, long max)
         {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class SmpteOffsetEvent : MetaEvent
     {
@@ -24,11 +21,6 @@ namespace Midity
 
         public SmpteOffsetEvent(byte hr, byte mn, byte se, byte fr, byte ff) : this(0, hr, mn, se, fr, ff)
         {
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(SmpteOffsetEvent);
         }
     }
 }

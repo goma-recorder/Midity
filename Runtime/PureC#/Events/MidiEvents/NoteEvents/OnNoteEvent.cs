@@ -3,7 +3,7 @@
     public sealed class OnNoteEvent : NoteEvent
     {
         public const byte STATUS_HEAD = 0x90;
-        public byte _velocity;
+        private byte _velocity;
 
         internal OnNoteEvent(uint ticks, byte channel, byte noteNumber, byte velocity) : base(ticks, channel,
             noteNumber)

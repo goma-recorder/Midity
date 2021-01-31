@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class UnknownMetaEvent : MetaEvent
     {
@@ -14,12 +10,6 @@ namespace Midity
         {
             this.metaId = metaId;
             this.data = data;
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            list.AddRange(data.Select(d => d.ToString()));
-            return typeof(UnknownMetaEvent);
         }
     }
 }

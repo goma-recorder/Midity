@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:Label text="MTrk Event List" display-tooltip-when-elided="true" />
+    <uie:ObjectField label="Midi File" allow-scene-objects="false" type="Midity.MidiFileAsset, goma_recorder.Midity.Runtime" name="TargetMidiFile" />
+    <ui:ScrollView name="EventList" mode="VerticalAndHorizontal" style="flex-direction: row; flex-wrap: nowrap; flex-basis: initial; margin-right: 0; padding-right: 0;" />
+</ui:UXML>

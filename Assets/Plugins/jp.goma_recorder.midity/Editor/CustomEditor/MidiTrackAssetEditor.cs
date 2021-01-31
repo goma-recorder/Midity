@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace Midity.Playable.Editor
 {
@@ -9,7 +10,6 @@ namespace Midity.Playable.Editor
     [CustomEditor(typeof(MidiTrackAsset))]
     internal class MidiTrackAssetEditor : UnityEditor.Editor
     {
-        private readonly List<string> _eventTexts = new List<string>();
         private string _ccText;
         private string _durationText;
         private string _noteText;
@@ -19,16 +19,11 @@ namespace Midity.Playable.Editor
             var asset = (MidiTrackAsset) target;
 
             var track = asset.MidiTrack;
-            var bars = track.Bars;
-            _durationText = bars + (bars > 1 ? " bars" : " bar");
 
             var note = new HashSet<(byte number, NoteOctave octave, NoteName name)>();
             var cc = new HashSet<int>();
 
-            _eventTexts.Clear();
             foreach (var e in track.Events)
-            {
-                _eventTexts.Add(e.ToString());
                 switch (e)
                 {
                     case OnNoteEvent onNoteEvent:
@@ -38,7 +33,6 @@ namespace Midity.Playable.Editor
                         cc.Add((int) controlChangeEvent.controller);
                         break;
                 }
-            }
 
             if (note.Count == 0)
             {
@@ -63,7 +57,22 @@ namespace Midity.Playable.Editor
             EditorGUILayout.LabelField("Note", _noteText);
             EditorGUILayout.LabelField("CC", _ccText);
             EditorGUI.indentLevel--;
-            foreach (var s in _eventTexts) EditorGUILayout.LabelField(s);
+        }
+
+        private Texture2D _texture2D;
+
+        public override Texture2D RenderStaticPreview(string assetPath, Object[] subAssets, int width, int height)
+        {
+            if (_texture2D is null)
+            {
+                var midiTrack = ((MidiTrackAsset) target).MidiTrack;
+                const int topMargin = 2;
+                const int bottomMargin = 1;
+                _texture2D = midiTrack.WriteNoteBarTexture2D((int) midiTrack.DeltaTime / 8, topMargin,
+                    bottomMargin, true);
+            }
+
+            return _texture2D;
         }
     }
 }

@@ -32,8 +32,8 @@ namespace Midity.Tests
                             Assert.That(midiFile1.Tracks[i].Events.Count == midiFile2.Tracks[i].Events.Count);
                             for (var j = 0; j < midiFile1.Tracks[i].Events.Count; j++)
                                 Assert.That(
-                                    midiFile1.Tracks[i].Events[j].ToString() ==
-                                    midiFile2.Tracks[i].Events[j].ToString());
+                                    midiFile1.Tracks[i].Events[j].GetType() ==
+                                    midiFile2.Tracks[i].Events[j].GetType());
                         }
                     }
                 }
@@ -45,7 +45,7 @@ namespace Midity.Tests
             [Test]
             public void SerializeTrack()
             {
-                var track1 = new MidiTrack("Name", 94);
+                var track1 = new MidiTrack(null, "Name", 94);
                 MidiTrack track2;
                 using (var stream = new MemoryStream())
                 {
@@ -59,7 +59,7 @@ namespace Midity.Tests
 
                 Assert.That(track1.Events.Count == track2.Events.Count);
                 for (var i = 0; i < track1.Events.Count; i++)
-                    Assert.That(track1.Events[i].ToString() == track2.Events[i].ToString());
+                    Assert.That(track1.Events[i].GetType() == track2.Events[i].GetType());
             }
         }
 
@@ -70,11 +70,11 @@ namespace Midity.Tests
                 var encoding = Encoding.GetEncoding(CodeName);
                 using (var stream = new MemoryStream())
                 {
-                    MidiSerializer.SerializeEvent(mTrkEvent, encoding, stream);
+                    MidiSerializer.SerializeEvent(mTrkEvent, encoding, stream, 0);
                     stream.Seek(0, SeekOrigin.Begin);
                     var deserializer = new MidiDeserializer(stream, encoding);
                     byte status = 0;
-                    return (T) deserializer.ReadEvent(ref status);
+                    return (T) deserializer.ReadEvent(ref status, 0);
                 }
             }
 
@@ -288,12 +288,12 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void QueueEvent()
+            public void CuePointEvent()
             {
                 var ticks = 20202u;
                 var text = "queue";
 
-                var x = new QueueEvent(ticks, text);
+                var x = new CuePointEvent(ticks, text);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
@@ -352,11 +352,11 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void EndPointEvent()
+            public void EndOfTrackEvent()
             {
                 var ticks = 18246u;
 
-                var x = new EndPointEvent(ticks);
+                var x = new EndOfTrackEvent(ticks);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);
@@ -396,7 +396,7 @@ namespace Midity.Tests
             }
 
             [Test]
-            public void BeatEvent()
+            public void TimeSignatureEvent()
             {
                 var ticks = 19864u;
                 byte nn = 0;
@@ -404,7 +404,7 @@ namespace Midity.Tests
                 byte cc = 0;
                 byte bb = 0;
 
-                var x = new BeatEvent(ticks, nn, dd, cc, bb);
+                var x = new TimeSignatureEvent(ticks, nn, dd, cc, bb);
                 var y = ReDeserialize(x);
 
                 Assert.That(x.Ticks == y.Ticks);

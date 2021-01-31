@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using static Midity.NoteKey;
 
 namespace Midity
 {
@@ -49,7 +48,12 @@ namespace Midity
             var chunkEndDataPosition = stream.Position;
             stream.Seek(4, SeekOrigin.Current);
             // UnityEngine.Debug.Log(stream.Position);
-            foreach (var mTrkEvent in midiTrack.Events) SerializeEvent(mTrkEvent, encoding, stream);
+            var lastTicks = 0u;
+            foreach (var mTrkEvent in midiTrack.Events)
+            {
+                SerializeEvent(mTrkEvent, encoding, stream, lastTicks);
+                lastTicks = mTrkEvent.Ticks;
+            }
 
             var chunkEnd = stream.Position - chunkEndDataPosition - 4;
             stream.Seek(chunkEndDataPosition, SeekOrigin.Begin);
@@ -58,7 +62,7 @@ namespace Midity
             stream.Seek(0, SeekOrigin.End);
         }
 
-        internal static void SerializeEvent(MTrkEvent mTrkEvent, Encoding encoding, Stream stream)
+        internal static void SerializeEvent(MTrkEvent mTrkEvent, Encoding encoding, Stream stream, uint lastTicks)
         {
             switch (mTrkEvent)
             {
@@ -107,8 +111,8 @@ namespace Midity
                 case MarkerEvent markerEvent:
                     WriteTextMetaEvent(markerEvent, markerEvent.text);
                     break;
-                case QueueEvent queueEvent:
-                    WriteTextMetaEvent(queueEvent, queueEvent.text);
+                case CuePointEvent cuePointEvent:
+                    WriteTextMetaEvent(cuePointEvent, cuePointEvent.text);
                     break;
                 case ProgramNameEvent programNameEvent:
                     WriteTextMetaEvent(programNameEvent, programNameEvent.name);
@@ -122,8 +126,8 @@ namespace Midity
                 case PortNumberEvent portNumberEvent:
                     WriteBytesDataMetaEvent(portNumberEvent, portNumberEvent.Number);
                     break;
-                case EndPointEvent endPointEvent:
-                    WriteBytesDataMetaEvent(endPointEvent);
+                case EndOfTrackEvent endOfTrackEvent:
+                    WriteBytesDataMetaEvent(endOfTrackEvent);
                     break;
                 case TempoEvent tempoEvent:
                     WriteBytesDataMetaEvent(
@@ -141,13 +145,13 @@ namespace Midity
                         smpteOffsetEvent.fr,
                         smpteOffsetEvent.ff);
                     break;
-                case BeatEvent beatEvent:
+                case TimeSignatureEvent timeSignatureEvent:
                     WriteBytesDataMetaEvent(
-                        beatEvent,
-                        beatEvent.numerator,
-                        beatEvent.denominator,
-                        beatEvent.midiClocksPerClick,
-                        beatEvent.numberOfNotated32nds);
+                        timeSignatureEvent,
+                        timeSignatureEvent.numerator,
+                        timeSignatureEvent.denominator,
+                        timeSignatureEvent.midiClocksPerClick,
+                        timeSignatureEvent.numberOfNotated32nds);
                     break;
                 case KeyEvent keyEvent:
                     WriteBytesDataMetaEvent(
@@ -172,7 +176,7 @@ namespace Midity
 
             void WriteEvent(params byte[] data)
             {
-                var tickBytes = ToMultiBytes(mTrkEvent.Ticks);
+                var tickBytes = ToMultiBytes(mTrkEvent.Ticks - lastTicks);
                 stream.Write(tickBytes);
                 stream.WriteByte(mTrkEvent.Status);
                 stream.Write(data);

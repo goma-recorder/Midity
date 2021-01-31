@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Midity
+﻿namespace Midity
 {
     public sealed class PitchBendEvent : MidiEvent
     {
@@ -57,11 +54,6 @@ namespace Midity
                 value >>= 7;
                 UpperBits = (byte) (value & 0x7F);
             }
-        }
-
-        protected override Type ToString(List<string> list)
-        {
-            return typeof(PitchBendEvent);
         }
     }
 }

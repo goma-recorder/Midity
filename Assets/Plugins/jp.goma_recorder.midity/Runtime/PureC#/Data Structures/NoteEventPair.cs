@@ -2,16 +2,19 @@
 {
     public sealed class NoteEventPair
     {
-        public uint LengthTick { get; internal set; }
         public readonly OnNoteEvent onNoteEvent;
         public readonly OffNoteEvent offNoteEvent;
 
-        internal NoteEventPair(OnNoteEvent onNoteEvent, OffNoteEvent offNoteEvent, uint lengthTick)
+        internal NoteEventPair(OnNoteEvent onNoteEvent, OffNoteEvent offNoteEvent)
         {
             this.onNoteEvent = onNoteEvent;
             this.offNoteEvent = offNoteEvent;
-            LengthTick = lengthTick;
+            this.onNoteEvent.NoteEventPair = this.offNoteEvent.NoteEventPair = this;
         }
+
+        public uint OnTick => onNoteEvent.Ticks;
+        public uint OffTick => offNoteEvent.Ticks;
+        public uint LengthTick => OffTick - OnTick;
 
         public byte Channel
         {

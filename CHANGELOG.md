@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/goma-recorder/Midity/compare/v1.1.0...v1.2.0) (2021-01-31)
+
+
+### Features
+
+* Event list window ([1984c32](https://github.com/goma-recorder/Midity/commit/1984c3276bb6aa1f52a3e3b662e13937ca028973))
+
 # [1.1.0](https://github.com/goma-recorder/Midity/compare/v1.0.0...v1.1.0) (2021-01-16)
 
 

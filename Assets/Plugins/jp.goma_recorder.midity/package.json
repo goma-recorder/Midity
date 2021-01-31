@@ -2,7 +2,7 @@
   "name": "jp.goma_recorder.midity",
   "displayName": "Midity",
   "author": "Tabi Morinaga",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "unity": "2020.1",
   "description": "Midity is a custom unity package for reading and writing Standard MIDI Files (SMF).",
   "keywords": [

@@ -17,5 +17,12 @@
   "bugs": {
     "url": "https://github.com/goma-recorder/Midity/issues"
   },
-  "homepage": "https://github.com/goma-recorder/Midity#readme"
+  "homepage": "https://github.com/goma-recorder/Midity#readme",
+  "samples": [
+    {
+      "displayName": "Playable Sample",
+      "description": "Timeline animation sample",
+      "path": "Samples~/Playable"
+    }
+  ]
 }

@@ -1,0 +1,45 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <uie:EnumField label="NoteType" value="Both" type="Midity.NoteTypeFilter, goma_recorder.Midity.Runtime" binding-path="noteTypeFilter">
+        <ui:VisualElement />
+    </uie:EnumField>
+    <ui:Foldout text="Note Name Filter">
+        <ui:Toggle label="Enable" binding-path="isNoteNameFilterEnabled" />
+        <ui:Label text="Note Name" display-tooltip-when-elided="true" />
+        <ui:VisualElement>
+            <ui:Toggle label="C" binding-path="_noteNameFilterValueTable.Array.data[0]" />
+            <ui:Toggle label="C#" binding-path="_noteNameFilterValueTable.Array.data[1]"  />
+            <ui:Toggle label="D" binding-path="_noteNameFilterValueTable.Array.data[2]"  />
+            <ui:Toggle label="D#" binding-path="_noteNameFilterValueTable.Array.data[3]"  />
+            <ui:Toggle label="E" binding-path="_noteNameFilterValueTable.Array.data[4]"  />
+            <ui:Toggle label="F" binding-path="_noteNameFilterValueTable.Array.data[5]"  />
+            <ui:Toggle label="F#" binding-path="_noteNameFilterValueTable.Array.data[6]"  />
+            <ui:Toggle label="G" binding-path="_noteNameFilterValueTable.Array.data[7]"  />
+            <ui:Toggle label="G#" binding-path="_noteNameFilterValueTable.Array.data[8]"  />
+            <ui:Toggle label="A" binding-path="_noteNameFilterValueTable.Array.data[9]"  />
+            <ui:Toggle label="A#" binding-path="_noteNameFilterValueTable.Array.data[10]"  />
+            <ui:Toggle label="B" binding-path="_noteNameFilterValueTable.Array.data[11]"  />
+        </ui:VisualElement>
+    </ui:Foldout>
+    <ui:Foldout text="Note Range Filter">
+        <ui:Toggle label="Enable" binding-path="isNoteRangeFilterEnabled" />
+        <ui:VisualElement style="flex-direction: row;">
+            <ui:VisualElement name="min" style="width: 50%;">
+                <ui:Label text="Min" display-tooltip-when-elided="true" />
+                <ui:VisualElement style="flex-direction: row;">
+                    <uie:EnumField value="C" type="Midity.NoteName, goma_recorder.Midity.Runtime" class="note-name-field" style="min-width: 45%;" />
+                    <uie:EnumField value="Minus2" type="Midity.NoteOctave, goma_recorder.Midity.Runtime" class="note-octave-field" style="min-width: 45%;" />
+                </ui:VisualElement>
+                <uie:IntegerField value="0" />
+            </ui:VisualElement>
+            <ui:VisualElement name="max" style="width: 50%;">
+                <ui:Label text="Max" display-tooltip-when-elided="true" />
+                <ui:VisualElement style="flex-direction: row;">
+                    <uie:EnumField value="C" type="Midity.NoteName, goma_recorder.Midity.Runtime" class="note-name-field" style="min-width: 45%;" />
+                    <uie:EnumField value="Minus2" type="Midity.NoteOctave, goma_recorder.Midity.Runtime" class="note-octave-field" style="min-width: 45%;" />
+                </ui:VisualElement>
+                <uie:IntegerField value="0" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:MinMaxSlider picking-mode="Ignore" min-value="0" max-value="131" low-limit="0" high-limit="131" />
+    </ui:Foldout>
+</ui:UXML>

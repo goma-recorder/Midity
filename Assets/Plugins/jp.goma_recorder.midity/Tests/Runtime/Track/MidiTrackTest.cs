@@ -1,7 +1,6 @@
 ﻿using Midity;
 using NUnit.Framework;
 using System.IO;
-using UnityEngine;
 
 namespace Tests
 {

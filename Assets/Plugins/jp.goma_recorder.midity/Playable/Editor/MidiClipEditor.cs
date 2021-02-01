@@ -23,7 +23,9 @@ namespace Midity.Playable.Editor
 
             Texture texture;
             if (_textures.ContainsKey(clip) && _textures[clip] is null)
+            {
                 texture = _textures[clip];
+            }
             else
             {
                 const int topMargin = 2;
@@ -37,7 +39,9 @@ namespace Midity.Playable.Editor
 
             Material material;
             if (_materials.ContainsKey(clip) && _materials[clip] is null)
+            {
                 material = _materials[clip];
+            }
             else
             {
                 var shader = Shader.Find("jp.goma_recorder.Midity.Playable/ClipBackground");
